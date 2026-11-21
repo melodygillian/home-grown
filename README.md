@@ -1,99 +1,155 @@
-# My Garden — smart garden maintenance (WHACK 2026)
+# 🌱 My Garden: a living map for native gardens
 
-The maintenance half of the project. It turns the garden plan into a living map:
+**Live demo:** https://smart-garden-two.vercel.app
+**Built at:** WHACK 2026 (Wellesley Hackathon)
 
-- **Garden map** with real dimensions, a sun/moisture grid, and cartoon plants.
-- Plants start **locked** (planned). Tap one → “Yes, I planted it” to start tracking.
-- **Growth score vs. expected curve** for every planted plant, with a colored ring: thriving / on track / needs attention / at risk.
-- **Sensor stakes** (simulated) give live soil moisture, soil temperature and sunlight, plus weekly camera growth points.
-- **No sensor?** The gardener types, **speaks**, or **photographs** a check-in. **Google Gemini** reads it into height, leaf color, flowers, wilting, pests and disease, and the app turns that into a growth score.
-- **Lifespan** tracking, **remove** (with reason, saved to a journal) and **replace** with natives that suit that exact spot and fit the space.
-- **7-day weather** for the gardener’s ZIP code (National Weather Service). Hover or tap a day to see alerts, soil moisture change, insect activity and growth outlook for *this* garden.
+Most smart-garden tools are built for tech-savvy hobbyists. **My Garden** is built for everyone else, including older gardeners and first-timers. You plan a garden of **Massachusetts native plants** once. After that, the plan becomes a cute, game-like map that keeps track of how each plant is growing, warns you about the week's weather, and tells you what to do, in plain language.
 
-## Files
+The project has two halves:
 
-| Path | What it does |
-|---|---|
-| `src/data/ma-native-plants.json` | 54 garden-friendly Massachusetts native plants: sun, moisture, size, bloom, lifespan, growth speed, drawing style. Shared with the planner. |
-| `src/data/sample-garden.json` | Example plan (24 × 14 ft backyard, 24 plants, 2 sensor stakes). |
-| `PLAN_FORMAT.md` | The plan format your teammate’s planner should output. |
-| `api/analyze.js` | Server function: sends the note/photo to Gemini, returns structured features. Keeps the API key secret. |
-| `api/weather.js` | Server function: ZIP → town → 7-day forecast. |
-| `src/lib/growth.js` | Expected growth curve, growth score, status. |
-| `src/lib/weather.js` | Weather → alerts / moisture / insects / growth rules. |
-| `src/lib/sensors.js` | Simulated sensor stake readings. |
-| `src/lib/catalog.js` | Plant lookup, footprint and “does it fit here?” rules. |
-| `src/components/*` | Map, flowers, plant panel, chart, check-in, weather bar, setup screens. |
+| Part | What it does | Status |
+|---|---|---|
+| **1. Planner** | The gardener enters the yard's size and ZIP code and marks each grid square's sunlight and moisture. The app suggests native plants that fit, and each plant gets the space it needs. | Teammates, see [`PLAN_FORMAT.md`](PLAN_FORMAT.md) |
+| **2. Garden (this repo)** | Turns the plan into a living map: tracks growth, reads check-ins with AI, gives weather alerts, and handles replacing plants. | ✅ Live |
 
 ---
 
-## Step 1 — Run it on your laptop
+## ✨ Features
 
-1. Install **Node.js 20 or newer** from https://nodejs.org (choose “LTS”).
-2. Unzip this folder, open a terminal **in the folder**, and run:
-   ```bash
-   npm install
-   ```
-3. Add your Gemini key (see Step 2), then run:
-   ```bash
-   npm run dev
-   ```
-4. Open http://localhost:5173 in **Chrome** (voice input needs Chrome, Edge or Safari).
+**🗺️ A map that matches your real yard**
+- Drawn from the planner's grid, with **real dimensions in feet** along both edges.
+- Switch between **Plants**, **Sunlight** and **Moisture** views.
+- Each species has its own cartoon drawing and takes up as much space as it needs to grow.
 
-Without a key everything still works, but check-ins use a simple keyword reader instead of Gemini (the result card says which one was used).
+**🔒 Planned → planted**
+- Every plant starts **faded and locked**. Tap it and say when you planted it, and tracking starts.
 
-## Step 2 — Gemini API key (exact steps)
+**📈 Growth vs. expected**
+- Each plant has a **growth score**: its size and health compared with a fully grown, healthy plant.
+- It's plotted against an **expected growth curve** for that species.
+- A colored ring on the map shows the status: 🟢 thriving · 🔵 on track · 🟠 needs attention · 🔴 at risk.
+- The gardener's first check-in sets the starting point, so a big plant from the nursery isn't marked as "ahead."
 
-1. Go to https://aistudio.google.com/apikey and sign in with your Google account.
-2. Click **Create API key** and copy it. Don’t paste it into chats, code, or GitHub.
-3. In the project folder, make a copy of `.env.example` and name it **`.env.local`**.
-4. Open `.env.local` and paste the key after the `=`:
-   ```
-   GEMINI_API_KEY=your-key-here
-   ```
-5. Stop and restart `npm run dev` (Ctrl+C, then `npm run dev` again).
-6. Test it: open the app → Try the sample backyard → tap **Wild bergamot** → plant it “2 months ago” → type *“about 20 inches tall, a few leaves have white powder, buds forming”* → **Save update**. The purple card should say **“Read by Google Gemini”**.
+**📡 Sensor stakes** *(simulated for the demo)*
+- One stake per bed reports soil moisture, soil temperature and hours of sun.
+- A stake camera adds a growth reading every week.
 
-`.env.local` is in `.gitignore`, so it won’t be uploaded to GitHub.
-If you see “model not found”, set `GEMINI_MODEL=gemini-2.5-flash` (or any model listed in AI Studio) in `.env.local`.
+**🗣️ Check-ins by typing, voice or photo (Google Gemini)**
+- For plants without a sensor, the gardener just describes what they see, for example: *"About 22 inches, perked up after the rain, a few flower buds."*
+- **Gemini** reads the note (and the photo, if there is one) and returns **structured data**: height, leaf color, flowers, wilting, pests, disease and new growth, plus a short summary and advice.
+- The app turns that data into a growth score and adds a point to the chart.
 
-## Step 3 — Put the code on GitHub
+**🌦️ The week's weather, explained for *your* garden**
+- A 7-day forecast for the gardener's ZIP code, from the National Weather Service.
+- Hover over or tap a day to see:
+  - **alerts that name your actual plants** (heat, frost, dry spells, heavy rain, wind, mildew)
+  - how soil moisture will change
+  - insect activity
+  - the outlook for plant growth
 
-1. Create a new repository on https://github.com/new (e.g. `smart-garden`). Don’t add a README.
-2. In the project folder:
-   ```bash
-   git init
-   git add .
-   git commit -m "Smart garden maintenance app"
-   git branch -M main
-   git remote add origin https://github.com/YOUR-USERNAME/smart-garden.git
-   git push -u origin main
-   ```
-3. Check that `.env.local` is **not** listed on GitHub.
+**🪦 Lifespan, removal and replacement**
+- Each plant's age is shown against how long that species usually lives.
+- If a plant dies, the gardener logs whether it reached the end of its life or died early. This goes into a garden journal.
+- The app then suggests natives that **suit that exact spot and fit the space**.
 
-## Step 4 — Put it online with Vercel (free)
+---
 
-1. Go to https://vercel.com and **sign up with GitHub**.
-2. **Add New… → Project**, pick your `smart-garden` repo, click **Import**.
-3. Vercel detects **Vite** automatically. Open **Environment Variables** and add:
-   - Name: `GEMINI_API_KEY` — Value: your key
-4. Click **Deploy**. In about a minute you get a link like `https://smart-garden-xyz.vercel.app`.
-5. Every `git push` to `main` redeploys automatically. If you change the key later: Project → Settings → Environment Variables, then **Redeploy**.
+## 🧱 How it works
 
-The `/api` folder becomes server functions on Vercel automatically, so the key stays on the server.
+```
+Planner (part 1) ──plan JSON──▶ Garden map (React)
+                                   │
+                                   ├── /api/analyze  ──▶ Google Gemini (structured JSON output)
+                                   └── /api/weather  ──▶ ZIP code ▶ coordinates ▶ National Weather Service forecast
+```
 
-## Demo script (2 minutes)
+- **Frontend:** React + Vite, all custom SVG drawings (no image assets)
+- **Backend:** Vercel serverless functions (`/api`), which keep the Gemini key secret
+- **AI:** Gemini API with a JSON response schema. The app computes the score from Gemini's output, so it's consistent and easy to explain.
+- **Data:** 54 garden-friendly Massachusetts native plants in `src/data/ma-native-plants.json`, shared by the planner and the garden
+- **Storage:** the browser's localStorage (no account needed for the demo)
 
-1. Enter a ZIP → **Try the sample backyard**. Point out the rulers (24 × 14 ft) and the **Sunlight / Moisture** views.
-2. All plants are faded and locked. Tap **Butterfly weed** → *2 months ago* → **Yes, I planted it**. It’s in a sensor bed: show live readings and the camera growth curve.
-3. Tap **Wild bergamot** (no sensor) → plant it → tap **Speak** and describe it → **Save update**. Gemini’s reading appears and a new point lands on the chart; the ring color changes.
-4. **Settings → Use a sample summer heat-wave week** and hover over the days: alerts name the plants that need water.
-5. On any plant: **This plant died → It died early** → pick a replacement that fits the spot.
+### Project structure
 
-Settings → *Plant everything 2 months ago* fills the garden quickly; *Reset garden to fresh plan* starts the demo over.
+| Path | Purpose |
+|---|---|
+| `src/data/ma-native-plants.json` | Plant catalog: sun, moisture, height, spread, bloom months, lifespan, growth speed, drawing style |
+| `src/data/sample-garden.json` | Example plan: a 24 × 14 ft backyard with 24 plants and 2 sensor stakes |
+| `PLAN_FORMAT.md` | The JSON format the planner outputs and the garden reads |
+| `api/analyze.js` | Sends the check-in (text + optional photo) to Gemini and returns structured features |
+| `api/weather.js` | ZIP code → town → 7-day forecast |
+| `src/lib/growth.js` | Expected-growth curve, growth score, health status |
+| `src/lib/weather.js` | Rules that turn the forecast into alerts, moisture, insect and growth notes |
+| `src/lib/catalog.js` | Plant lookup, how much space a plant takes, and whether a plant fits a spot |
+| `src/lib/sensors.js` | Simulated sensor-stake readings |
+| `src/components/` | Map, flowers, plant panel, chart, check-in, weather bar, setup screens |
 
-## Notes for judges / honesty
+---
 
-- Sensor stakes and camera growth points are **simulated** (see `src/lib/sensors.js`, `cameraLogs` in `src/lib/growth.js`).
-- Plant sun/moisture ranges come from the Lady Bird Johnson Wildflower Center “Massachusetts Recommended” list, the MA Dept. of Agricultural Resources pollinator list and nursery references. Expected-growth curves and lifespans are estimates.
-- Data is saved in the browser (localStorage), not a database.
+## 🚀 Run it locally
+
+You need **Node.js 20+** ([nodejs.org](https://nodejs.org), choose "LTS").
+
+```bash
+git clone https://github.com/melodygillian/smart-garden.git
+cd smart-garden
+npm install
+npm run dev
+```
+
+Open **http://localhost:5173** in **Chrome**. Voice input needs Chrome, Edge or Safari.
+
+### Gemini key (optional for local work)
+
+Without a key, check-ins use a simple keyword reader. The result card says which reader was used. To use Gemini locally:
+
+1. Get a free key at **https://aistudio.google.com/apikey**.
+2. Copy the example file: `cp .env.example .env.local`
+3. Open `.env.local` and set `GEMINI_API_KEY=your-key`.
+4. Restart `npm run dev`.
+
+⚠️ **Never commit `.env.local` or paste a key into chat.** The file is already in `.gitignore`.
+
+The Terminal running `npm run dev` prints a line for every Gemini call, showing what was sent, what came back, and how long it took.
+
+### Deploying
+
+The live site deploys automatically from `main` on **Vercel**. Every push updates https://smart-garden-two.vercel.app within about a minute. The Gemini key is stored in Vercel under **Project → Settings → Environment Variables**.
+
+---
+
+## 🤝 For the planner team
+
+1. Read [`PLAN_FORMAT.md`](PLAN_FORMAT.md). The planner just needs to output that JSON.
+2. Suggest plants using the `id`s in `src/data/ma-native-plants.json`. Each plant lists which **sun** (`full_sun`, `part_shade`, `shade`) and **moisture** (`wet`, `wet_mesic`, `mesic`, `dry_mesic`, `dry`) conditions it tolerates.
+3. A plant takes up `size × size` grid squares, where `size = ceil(spread in ft ÷ square size in ft)`. You can import `footprint()` and `canPlace()` from `src/lib/catalog.js` instead of rewriting them.
+4. To hand off the plan, either:
+   - save it with `localStorage.setItem('gardenPlan', JSON.stringify(plan))` (if your page is on the same site), or
+   - offer a "Download plan" button that saves the JSON file, which the garden page can upload.
+
+**Git workflow:** run `git pull` before starting. Keep your files in your own folder to avoid conflicts. Commit and push small, working changes.
+
+---
+
+## 🎬 2-minute demo script
+
+1. Enter a ZIP code → **Try the sample backyard**. Point out the rulers in feet and switch to the **Sunlight** and **Moisture** views.
+2. Every plant is faded and locked. Tap **Butterfly weed** → **2 months ago** → **Yes, I planted it**. It's next to a sensor stake, so show the live readings and the growth curve.
+3. Tap **Wild bergamot**, which has no sensor. Plant it, then tap **Speak** and describe it. Gemini returns structured features, a new point appears on the chart, and the ring color updates.
+4. Go to **Settings → Use a sample summer heat-wave week** and hover over the days. The alerts name the plants that need water.
+5. On any plant: **This plant died → It died early**, then pick a replacement that fits the spot.
+
+To set up the demo: **Settings → Plant everything 2 months ago** fills the garden, and **Reset garden to fresh plan** starts over.
+
+---
+
+## 📝 Honest notes
+
+- **Simulated:** sensor stakes and camera growth readings (`src/lib/sensors.js`, `cameraLogs` in `src/lib/growth.js`). The real hardware would be an ESP32 with a soil-moisture probe, a temperature probe and a camera, inside one sealed, solar-powered stake.
+- **Plant data:** sun and moisture ranges were compiled from the Lady Bird Johnson Wildflower Center's *Massachusetts Recommended* list, the MA Department of Agricultural Resources' native pollinator list, and nursery references. Expected-growth curves and lifespans are estimates.
+- **Weather alerts** are simple, readable rules (see `src/lib/weather.js`), not a plant simulation.
+- Data is saved in the browser, not a database.
+
+## 🛠️ Built with
+
+React · Vite · Vercel · Google Gemini API · National Weather Service API · Zippopotam.us · Web Speech API
