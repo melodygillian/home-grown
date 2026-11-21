@@ -1,0 +1,522 @@
+{
+ "version": 1,
+ "name": "Sample backyard",
+ "zip": "02481",
+ "width_ft": 24,
+ "length_ft": 14,
+ "cell_ft": 2,
+ "cells": [
+  [
+   {
+    "sun": "full_sun",
+    "moisture": "dry"
+   },
+   {
+    "sun": "full_sun",
+    "moisture": "dry"
+   },
+   {
+    "sun": "full_sun",
+    "moisture": "dry"
+   },
+   {
+    "sun": "full_sun",
+    "moisture": "dry"
+   },
+   {
+    "sun": "full_sun",
+    "moisture": "mesic"
+   },
+   {
+    "sun": "full_sun",
+    "moisture": "mesic"
+   },
+   {
+    "sun": "full_sun",
+    "moisture": "mesic"
+   },
+   {
+    "sun": "full_sun",
+    "moisture": "mesic"
+   },
+   {
+    "sun": "part_shade",
+    "moisture": "wet_mesic"
+   },
+   {
+    "sun": "part_shade",
+    "moisture": "wet_mesic"
+   },
+   {
+    "sun": "part_shade",
+    "moisture": "wet_mesic"
+   },
+   {
+    "sun": "part_shade",
+    "moisture": "wet_mesic"
+   }
+  ],
+  [
+   {
+    "sun": "full_sun",
+    "moisture": "dry"
+   },
+   {
+    "sun": "full_sun",
+    "moisture": "dry"
+   },
+   {
+    "sun": "full_sun",
+    "moisture": "dry"
+   },
+   {
+    "sun": "full_sun",
+    "moisture": "dry"
+   },
+   {
+    "sun": "full_sun",
+    "moisture": "mesic"
+   },
+   {
+    "sun": "full_sun",
+    "moisture": "mesic"
+   },
+   {
+    "sun": "full_sun",
+    "moisture": "mesic"
+   },
+   {
+    "sun": "full_sun",
+    "moisture": "mesic"
+   },
+   {
+    "sun": "part_shade",
+    "moisture": "wet_mesic"
+   },
+   {
+    "sun": "part_shade",
+    "moisture": "wet_mesic"
+   },
+   {
+    "sun": "part_shade",
+    "moisture": "wet_mesic"
+   },
+   {
+    "sun": "part_shade",
+    "moisture": "wet_mesic"
+   }
+  ],
+  [
+   {
+    "sun": "full_sun",
+    "moisture": "dry"
+   },
+   {
+    "sun": "full_sun",
+    "moisture": "dry"
+   },
+   {
+    "sun": "full_sun",
+    "moisture": "dry"
+   },
+   {
+    "sun": "full_sun",
+    "moisture": "dry"
+   },
+   {
+    "sun": "full_sun",
+    "moisture": "mesic"
+   },
+   {
+    "sun": "full_sun",
+    "moisture": "mesic"
+   },
+   {
+    "sun": "full_sun",
+    "moisture": "mesic"
+   },
+   {
+    "sun": "full_sun",
+    "moisture": "mesic"
+   },
+   {
+    "sun": "part_shade",
+    "moisture": "wet_mesic"
+   },
+   {
+    "sun": "part_shade",
+    "moisture": "wet_mesic"
+   },
+   {
+    "sun": "part_shade",
+    "moisture": "wet_mesic"
+   },
+   {
+    "sun": "part_shade",
+    "moisture": "wet_mesic"
+   }
+  ],
+  [
+   {
+    "sun": "full_sun",
+    "moisture": "dry"
+   },
+   {
+    "sun": "full_sun",
+    "moisture": "dry"
+   },
+   {
+    "sun": "full_sun",
+    "moisture": "dry"
+   },
+   {
+    "sun": "full_sun",
+    "moisture": "dry"
+   },
+   {
+    "sun": "full_sun",
+    "moisture": "mesic"
+   },
+   {
+    "sun": "full_sun",
+    "moisture": "mesic"
+   },
+   {
+    "sun": "full_sun",
+    "moisture": "mesic"
+   },
+   {
+    "sun": "full_sun",
+    "moisture": "mesic"
+   },
+   {
+    "sun": "part_shade",
+    "moisture": "wet"
+   },
+   {
+    "sun": "part_shade",
+    "moisture": "wet"
+   },
+   {
+    "sun": "part_shade",
+    "moisture": "wet"
+   },
+   {
+    "sun": "part_shade",
+    "moisture": "wet"
+   }
+  ],
+  [
+   {
+    "sun": "full_sun",
+    "moisture": "dry_mesic"
+   },
+   {
+    "sun": "full_sun",
+    "moisture": "dry_mesic"
+   },
+   {
+    "sun": "full_sun",
+    "moisture": "dry_mesic"
+   },
+   {
+    "sun": "full_sun",
+    "moisture": "dry_mesic"
+   },
+   {
+    "sun": "part_shade",
+    "moisture": "mesic"
+   },
+   {
+    "sun": "part_shade",
+    "moisture": "mesic"
+   },
+   {
+    "sun": "part_shade",
+    "moisture": "mesic"
+   },
+   {
+    "sun": "part_shade",
+    "moisture": "mesic"
+   },
+   {
+    "sun": "part_shade",
+    "moisture": "wet"
+   },
+   {
+    "sun": "part_shade",
+    "moisture": "wet"
+   },
+   {
+    "sun": "part_shade",
+    "moisture": "wet"
+   },
+   {
+    "sun": "part_shade",
+    "moisture": "wet"
+   }
+  ],
+  [
+   {
+    "sun": "full_sun",
+    "moisture": "dry_mesic"
+   },
+   {
+    "sun": "full_sun",
+    "moisture": "dry_mesic"
+   },
+   {
+    "sun": "full_sun",
+    "moisture": "dry_mesic"
+   },
+   {
+    "sun": "full_sun",
+    "moisture": "dry_mesic"
+   },
+   {
+    "sun": "part_shade",
+    "moisture": "mesic"
+   },
+   {
+    "sun": "part_shade",
+    "moisture": "mesic"
+   },
+   {
+    "sun": "part_shade",
+    "moisture": "mesic"
+   },
+   {
+    "sun": "part_shade",
+    "moisture": "mesic"
+   },
+   {
+    "sun": "part_shade",
+    "moisture": "wet"
+   },
+   {
+    "sun": "part_shade",
+    "moisture": "wet"
+   },
+   {
+    "sun": "part_shade",
+    "moisture": "wet"
+   },
+   {
+    "sun": "part_shade",
+    "moisture": "wet"
+   }
+  ],
+  [
+   {
+    "sun": "full_sun",
+    "moisture": "dry_mesic"
+   },
+   {
+    "sun": "full_sun",
+    "moisture": "dry_mesic"
+   },
+   {
+    "sun": "full_sun",
+    "moisture": "dry_mesic"
+   },
+   {
+    "sun": "full_sun",
+    "moisture": "dry_mesic"
+   },
+   {
+    "sun": "part_shade",
+    "moisture": "mesic"
+   },
+   {
+    "sun": "part_shade",
+    "moisture": "mesic"
+   },
+   {
+    "sun": "part_shade",
+    "moisture": "mesic"
+   },
+   {
+    "sun": "part_shade",
+    "moisture": "mesic"
+   },
+   {
+    "sun": "part_shade",
+    "moisture": "wet"
+   },
+   {
+    "sun": "part_shade",
+    "moisture": "wet"
+   },
+   {
+    "sun": "part_shade",
+    "moisture": "wet"
+   },
+   {
+    "sun": "part_shade",
+    "moisture": "wet"
+   }
+  ]
+ ],
+ "plants": [
+  {
+   "id": "p1",
+   "species": "asclepias-tuberosa",
+   "x": 0,
+   "y": 0
+  },
+  {
+   "id": "p2",
+   "species": "asclepias-tuberosa",
+   "x": 2,
+   "y": 0
+  },
+  {
+   "id": "p3",
+   "species": "schizachyrium-scoparium",
+   "x": 3,
+   "y": 1
+  },
+  {
+   "id": "p4",
+   "species": "rudbeckia-hirta",
+   "x": 0,
+   "y": 2
+  },
+  {
+   "id": "p5",
+   "species": "rudbeckia-hirta",
+   "x": 2,
+   "y": 2
+  },
+  {
+   "id": "p6",
+   "species": "lupinus-perennis",
+   "x": 1,
+   "y": 3
+  },
+  {
+   "id": "p7",
+   "species": "vaccinium-angustifolium",
+   "x": 3,
+   "y": 3
+  },
+  {
+   "id": "p8",
+   "species": "rosa-carolina",
+   "x": 0,
+   "y": 4
+  },
+  {
+   "id": "p9",
+   "species": "achillea-millefolium",
+   "x": 2,
+   "y": 5
+  },
+  {
+   "id": "p10",
+   "species": "monarda-fistulosa",
+   "x": 4,
+   "y": 0
+  },
+  {
+   "id": "p11",
+   "species": "monarda-fistulosa",
+   "x": 6,
+   "y": 0
+  },
+  {
+   "id": "p12",
+   "species": "symphyotrichum-novae-angliae",
+   "x": 5,
+   "y": 1
+  },
+  {
+   "id": "p13",
+   "species": "pycnanthemum-virginianum",
+   "x": 7,
+   "y": 1
+  },
+  {
+   "id": "p14",
+   "species": "aquilegia-canadensis",
+   "x": 4,
+   "y": 2
+  },
+  {
+   "id": "p15",
+   "species": "zizia-aurea",
+   "x": 6,
+   "y": 2
+  },
+  {
+   "id": "p16",
+   "species": "geranium-maculatum",
+   "x": 4,
+   "y": 5
+  },
+  {
+   "id": "p17",
+   "species": "polystichum-acrostichoides",
+   "x": 6,
+   "y": 5
+  },
+  {
+   "id": "p18",
+   "species": "eutrochium-maculatum",
+   "x": 8,
+   "y": 0
+  },
+  {
+   "id": "p19",
+   "species": "asclepias-incarnata",
+   "x": 10,
+   "y": 0
+  },
+  {
+   "id": "p20",
+   "species": "iris-versicolor",
+   "x": 8,
+   "y": 3
+  },
+  {
+   "id": "p21",
+   "species": "iris-versicolor",
+   "x": 10,
+   "y": 3
+  },
+  {
+   "id": "p22",
+   "species": "lobelia-cardinalis",
+   "x": 11,
+   "y": 2
+  },
+  {
+   "id": "p23",
+   "species": "vaccinium-corymbosum",
+   "x": 8,
+   "y": 4
+  },
+  {
+   "id": "p24",
+   "species": "osmundastrum-cinnamomeum",
+   "x": 11,
+   "y": 5
+  }
+ ],
+ "sensors": [
+  {
+   "id": "stake-1",
+   "name": "Sunny corner stake",
+   "x": 1,
+   "y": 2,
+   "radius": 2
+  },
+  {
+   "id": "stake-2",
+   "name": "Rain garden stake",
+   "x": 9,
+   "y": 2,
+   "radius": 2
+  }
+ ]
+}
