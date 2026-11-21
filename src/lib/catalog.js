@@ -3,9 +3,19 @@ import catalogData from '../data/ma-native-plants.json';
 
 export const CATALOG = catalogData.plants;
 const BY_ID = Object.fromEntries(CATALOG.map((p) => [p.id, p]));
+// Extra species that arrive with a plan (e.g. plants the planner found in FloraAPI that aren't in our catalog).
+const EXTRA = new Map();
+
+export function registerSpecies(list) {
+  for (const s of list || []) if (s && s.id && !BY_ID[s.id]) EXTRA.set(s.id, s);
+}
 
 export function getSpecies(id) {
-  return BY_ID[id] || null;
+  return BY_ID[id] || EXTRA.get(id) || null;
+}
+
+export function allSpecies() {
+  return [...CATALOG, ...EXTRA.values()];
 }
 
 export const SUN_LABEL = { full_sun: 'Sunny', part_shade: 'Partly shady', shade: 'Shady' };
@@ -22,6 +32,11 @@ export function footprint(species, cellFt) {
   if (!species) return 1;
   const spreadFt = species.spread_cm / 30.48;
   return Math.max(1, Math.ceil(spreadFt / (cellFt || 1) - 0.05));
+}
+
+/** Grid size of a placed plant: the plan's own size if given (planner imports), else from its species. */
+export function sizeOf(plan, plant) {
+  return plant.size || footprint(getSpecies(plant.species), plan.cell_ft);
 }
 
 /** Cells covered by a plant placed with its top-left corner at (x, y). */
@@ -50,8 +65,7 @@ export function canPlace(plan, plants, species, x, y, ignoreId) {
   const taken = new Set();
   for (const p of plants) {
     if (p.id === ignoreId || p.status === 'removed') continue;
-    const s = getSpecies(p.species);
-    for (const [cx, cy] of cellsOf(p.x, p.y, footprint(s, plan.cell_ft))) taken.add(cx + ',' + cy);
+    for (const [cx, cy] of cellsOf(p.x, p.y, sizeOf(plan, p))) taken.add(cx + ',' + cy);
   }
   return cellsOf(x, y, size).every(([cx, cy]) => !taken.has(cx + ',' + cy));
 }
@@ -61,7 +75,7 @@ export function suggestionsFor(plan, plants, spot) {
   const area = cellsOf(spot.x, spot.y, spot.size || 1);
   const sun = majority(plan, area, 'sun');
   const moisture = majority(plan, area, 'moisture');
-  return CATALOG.filter(
+  return allSpecies().filter(
     (s) => s.sun.includes(sun) && s.moisture.includes(moisture) && canPlace(plan, plants, s, spot.x, spot.y, spot.id),
   )
     .map((s) => ({ species: s, size: footprint(s, plan.cell_ft) }))

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import Flower from './Flower.jsx';
-import { getSpecies, footprint, SUN_LABEL, MOISTURE_LABEL } from '../lib/catalog.js';
+import { getSpecies, sizeOf, SUN_LABEL, MOISTURE_LABEL } from '../lib/catalog.js';
 import { STATUS } from '../lib/growth.js';
 
 const SOIL = { dry: '#E8CFA0', dry_mesic: '#DEC191', mesic: '#D3B282', wet_mesic: '#C6A374', wet: '#B7936A' };
@@ -94,7 +94,7 @@ export default function GardenMap({ plan, plants, statusById, selectedId, onSele
 
               {plants.map((p) => {
                 const sp = getSpecies(p.species);
-                const size = footprint(sp, plan.cell_ft);
+                const size = sizeOf(plan, p);
                 const st = statusById[p.id];
                 const S = STATUS[st] || STATUS.planned;
                 const isSel = p.id === selectedId;

@@ -1,6 +1,6 @@
 // Reads a garden plan (the JSON your teammate's planning part produces) and checks it.
 // Format is documented in PLAN_FORMAT.md.
-import { getSpecies } from './catalog.js';
+import { getSpecies, registerSpecies } from './catalog.js';
 
 const SUNS = ['full_sun', 'part_shade', 'shade'];
 const MOISTURES = ['wet', 'wet_mesic', 'mesic', 'dry_mesic', 'dry'];
@@ -8,6 +8,7 @@ const MOISTURES = ['wet', 'wet_mesic', 'mesic', 'dry_mesic', 'dry'];
 export function checkPlan(plan) {
   const errors = [];
   if (!plan || typeof plan !== 'object') return ['The file is not a garden plan.'];
+  registerSpecies(plan.species);
   if (!(plan.width_ft > 0) || !(plan.length_ft > 0)) errors.push('width_ft and length_ft must be positive numbers.');
   const cell = plan.cell_ft || 1;
   const cols = Math.round(plan.width_ft / cell);
@@ -35,6 +36,7 @@ export function gardenFromPlan(plan) {
     species: p.species,
     x: p.x,
     y: p.y,
+    size: p.size,
     status: 'planned',
     plantedOn: null,
     logs: [],

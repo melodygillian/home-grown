@@ -1,9 +1,10 @@
 import { useRef, useState } from 'react';
 import { checkPlan } from '../lib/plan.js';
+import { isPlannerPlan, convertPlannerPlan } from '../lib/importPlanner.js';
 import { readHandoffPlan } from '../lib/storage.js';
 import samplePlan from '../data/sample-garden.json';
 
-export function ZipScreen({ onDone }) {
+export function ZipScreen({ onDone, planName }) {
   const [zip, setZip] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
@@ -14,7 +15,7 @@ export function ZipScreen({ onDone }) {
     setBusy(true);
     setErr('');
     try {
-      const r = await fetch(`/api/weather?zip=${zip}`);
+      const r = await fetch(`/api/weather?zip=${zip}`, { signal: AbortSignal.timeout(15000) });
       const data = await r.json().catch(() => ({}));
       if (r.status === 404 || r.status === 400) {
         setErr(data.error || 'We couldn’t find that ZIP code.');
@@ -34,6 +35,7 @@ export function ZipScreen({ onDone }) {
           <path d="M12 22V12" /><path d="M12 12c0-4 3-7 7-7 0 4-3 7-7 7z" fill="#A9D3B4" /><path d="M12 14c0-3-2.5-5.5-6-5.5 0 3 2.5 5.5 6 5.5z" fill="#CFE6C2" />
         </svg>
         <h1 className="h1">Welcome to your garden</h1>
+        {planName && <p className="ok-note">Your plan <b>{planName}</b> is ready to open.</p>}
         <p className="lead">First, where is your garden? We use your ZIP code for local weather.</p>
         <label htmlFor="zip" className="h3">ZIP code</label>
         <input id="zip" className="big-input" inputMode="numeric" autoComplete="postal-code" maxLength={5} value={zip}
@@ -50,7 +52,8 @@ export function PlanScreen({ onPlan, onBack }) {
   const fileRef = useRef(null);
   const handoff = readHandoffPlan();
 
-  function use(plan) {
+  function use(raw) {
+    const plan = isPlannerPlan(raw) ? convertPlannerPlan(raw) : raw;
     const errors = checkPlan(plan);
     if (errors.length) return setErr(errors);
     onPlan(plan);
@@ -71,7 +74,7 @@ export function PlanScreen({ onPlan, onBack }) {
     <div className="setup">
       <div className="card setup-card">
         <h1 className="h1">Bring in your garden plan</h1>
-        <p className="lead">Your plan from the planner becomes your living garden map. Every plant starts “not planted yet” until you tell us it’s in the ground.</p>
+        <p className="lead">Your plan from the BayState Bloom planner becomes your living garden map. In the planner, use “Open in My Garden”, or download the plan file and upload it here. Every plant starts “not planted yet” until you tell us it’s in the ground.</p>
         {handoff && <button className="btn btn-big" onClick={() => use(handoff)}>Use the plan from the planner</button>}
         <button className="btn btn-soft btn-wide" onClick={() => fileRef.current?.click()}>Upload a plan file (.json)</button>
         <input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={upload} />

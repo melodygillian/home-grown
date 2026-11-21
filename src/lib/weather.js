@@ -2,7 +2,7 @@
 // The rules below are deliberately simple and readable, so they're easy to explain and tweak.
 
 export async function fetchWeather(zip) {
-  const r = await fetch(`/api/weather?zip=${encodeURIComponent(zip)}`);
+  const r = await fetch(`/api/weather?zip=${encodeURIComponent(zip)}`, { signal: AbortSignal.timeout(15000) });
   const data = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error(data.error || 'Weather lookup failed');
   return data;

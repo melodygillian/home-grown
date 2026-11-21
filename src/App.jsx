@@ -3,18 +3,34 @@ import GardenMap from './components/GardenMap.jsx';
 import PlantPanel from './components/PlantPanel.jsx';
 import WeatherBar from './components/WeatherBar.jsx';
 import { ZipScreen, PlanScreen } from './components/Setup.jsx';
-import { getSpecies, footprint, cellsOf, majority, suggestionsFor } from './lib/catalog.js';
-import { daysSince, expectedScore, scoreFromFeatures, statusOf, cameraLogs } from './lib/growth.js';
+import { getSpecies, sizeOf, cellsOf, majority, suggestionsFor, registerSpecies } from './lib/catalog.js';
+import { daysSince, expectedScore, scoreFromFeatures, statusOf, cameraLogs, baseScoreOf, localIso } from './lib/growth.js';
 import { stakeFor, readingsFor } from './lib/sensors.js';
 import { fetchWeather, sampleSummerWeek } from './lib/weather.js';
 import { analyzeCheckIn } from './lib/analyze.js';
-import { gardenFromPlan } from './lib/plan.js';
+import { gardenFromPlan, checkPlan } from './lib/plan.js';
+import { isPlannerPlan, convertPlannerPlan, readPlanFromHash, clearHash } from './lib/importPlanner.js';
 import { loadState, saveState, clearState } from './lib/storage.js';
+
+function incomingFromHash() {
+  const raw = readPlanFromHash();
+  if (!raw) return null;
+  if (raw.error) return { error: raw.error };
+  const plan = isPlannerPlan(raw) ? convertPlannerPlan(raw) : raw;
+  const errs = checkPlan(plan);
+  return errs.length ? { error: 'This plan couldn’t be opened: ' + errs[0] } : { plan };
+}
 
 const EMPTY = { zip: null, place: null, plan: null, plants: [], journal: [], sampleWeather: false };
 
 export default function App() {
-  const [state, setState] = useState(() => ({ ...EMPTY, ...(loadState() || {}) }));
+  const [state, setState] = useState(() => {
+    const s = { ...EMPTY, ...(loadState() || {}) };
+    if (s.plan) registerSpecies(s.plan.species);
+    return s;
+  });
+  // A plan sent from the planner through the link (https://…/#plan=…)
+  const [incoming, setIncoming] = useState(() => incomingFromHash());
   const [selectedId, setSelectedId] = useState(null);
   const [overlay, setOverlay] = useState('plants');
   const [weather, setWeather] = useState({ days: null, loading: false, note: '' });
@@ -22,6 +38,33 @@ export default function App() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => saveState(state), [state]);
+  useEffect(() => {
+    if (incoming) clearHash();
+    // The planner can also send a plan while this page is already open.
+    const onHash = () => {
+      const next = incomingFromHash();
+      if (next) {
+        setIncoming(next);
+        clearHash();
+      }
+    };
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  function applyPlan(p) {
+    registerSpecies(p.species);
+    setState((s) => ({ ...s, plan: p, plants: gardenFromPlan(p), journal: [] }));
+    setSelectedId(null);
+  }
+
+  // First visit with a plan link: open it as soon as we know the ZIP code.
+  useEffect(() => {
+    if (incoming?.plan && state.zip && !state.plan) {
+      applyPlan(incoming.plan);
+      setIncoming(null);
+    }
+  }, [incoming, state.zip, state.plan]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Load the forecast whenever the ZIP changes.
   useEffect(() => {
@@ -53,12 +96,15 @@ export default function App() {
       const stake = stakeFor(plan, p);
       const today = p.plantedOn ? daysSince(p.plantedOn, now) : 0;
       let logs = [];
+      const base = stake ? undefined : baseScoreOf(p.logs);
       if (p.status === 'planted') {
-        logs = stake ? cameraLogs(p, sp, now) : [{ day: 0, score: Math.round(expectedScore(sp, 0)), source: 'start' }, ...(p.logs || [])];
+        const notes = p.logs || [];
+        const startsWithNote = notes.length && notes[0].day === 0;
+        logs = stake ? cameraLogs(p, sp, now) : startsWithNote ? notes : [{ day: 0, score: Math.round(base), source: 'start' }, ...notes];
       }
-      const status = statusOf({ ...p, logs }, sp);
-      const cells = cellsOf(p.x, p.y, footprint(sp, plan.cell_ft));
-      out[p.id] = { sp, stake, today, logs, status, spot: { sun: majority(plan, cells, 'sun'), moisture: majority(plan, cells, 'moisture') } };
+      const status = statusOf({ ...p, logs, base }, sp);
+      const cells = cellsOf(p.x, p.y, sizeOf(plan, p));
+      out[p.id] = { sp, stake, today, logs, status, base, spot: { sun: majority(plan, cells, 'sun'), moisture: majority(plan, cells, 'moisture') } };
     }
     return out;
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -67,12 +113,13 @@ export default function App() {
   const days = state.sampleWeather || (!weather.loading && !weather.days) ? sampleSummerWeek() : weather.days;
   const usingSample = state.sampleWeather || (!weather.loading && !weather.days);
 
-  if (!state.zip) return <ZipScreen onDone={(zip, place) => setState((s) => ({ ...s, zip, place }))} />;
+  if (!state.zip)
+    return <ZipScreen planName={incoming?.plan?.name} onDone={(zip, place) => setState((s) => ({ ...s, zip, place }))} />;
   if (!plan)
     return (
       <PlanScreen
         onBack={() => setState((s) => ({ ...s, zip: null, place: null }))}
-        onPlan={(p) => setState((s) => ({ ...s, plan: p, plants: gardenFromPlan(p), journal: [] }))}
+        onPlan={applyPlan}
       />
     );
 
@@ -97,7 +144,7 @@ export default function App() {
     const p = sel;
     const d = selD;
     setBusy(true);
-    const expected = expectedScore(d.sp, d.today);
+    const expected = expectedScore(d.sp, d.today, d.base);
     const res = await analyzeCheckIn({
       ...payload,
       plant: { common: d.sp.common, scientific: d.sp.scientific, type: d.sp.type, height_cm: d.sp.height_cm, bloom: d.sp.bloom, sun: d.spot.sun, moisture: d.spot.moisture },
@@ -120,7 +167,7 @@ export default function App() {
   }
 
   function demoPlantAll() {
-    const iso = new Date(Date.now() - 60 * 86400000).toISOString().slice(0, 10);
+    const iso = localIso(new Date(Date.now() - 60 * 86400000));
     setState((s) => ({ ...s, plants: s.plants.map((p) => (p.status === 'planned' ? { ...p, status: 'planted', plantedOn: iso, logs: [] } : p)) }));
     setMenuOpen(false);
   }
@@ -133,7 +180,7 @@ export default function App() {
         <div>
           <h1 className="h1">My Garden</h1>
           <p className="lead">
-            {placeLabel} · {plantedCount} of {activeCount} plants in the ground · {plan.width_ft} × {plan.length_ft} ft
+            {plan.name && plan.name !== 'Sample backyard' ? `${plan.name} · ` : ''}{placeLabel} · {plantedCount} of {activeCount} plants in the ground · {plan.width_ft} × {plan.length_ft} ft
           </p>
         </div>
         <div className="menu-wrap">
@@ -144,6 +191,9 @@ export default function App() {
             <div className="menu" role="menu">
               <button role="menuitem" onClick={() => { setState((s) => ({ ...s, zip: null, place: null })); setMenuOpen(false); }}>Change ZIP code</button>
               <button role="menuitem" onClick={() => { setState((s) => ({ ...s, plan: null, plants: [] })); setSelectedId(null); setMenuOpen(false); }}>Load a different garden plan</button>
+              {plan.source?.url && (
+                <a role="menuitem" className="menu-link" href={plan.source.url} target="_blank" rel="noreferrer">Edit this plan in the planner ↗</a>
+              )}
               <hr />
               <span className="menu-h">Demo tools</span>
               <button role="menuitem" onClick={demoPlantAll}>Plant everything 2 months ago</button>
@@ -156,6 +206,25 @@ export default function App() {
           )}
         </div>
       </header>
+
+      {incoming && (
+        <div className={'hint' + (incoming.error ? ' hint-error' : '')} role="status">
+          {incoming.error ? (
+            <>
+              <span className="grow">{incoming.error}</span>
+              <button type="button" className="btn btn-soft" onClick={() => setIncoming(null)}>OK</button>
+            </>
+          ) : (
+            <>
+              <span className="grow">
+                A new plan arrived from the planner: <b>{incoming.plan.name}</b> ({incoming.plan.width_ft} × {incoming.plan.length_ft} ft, {incoming.plan.plants.length} plants).
+              </span>
+              <button type="button" className="btn btn-primary" onClick={() => { applyPlan(incoming.plan); setIncoming(null); }}>Open new plan</button>
+              <button type="button" className="btn btn-soft" onClick={() => setIncoming(null)}>Keep my current garden</button>
+            </>
+          )}
+        </div>
+      )}
 
       {plantedCount === 0 && (
         <div className="hint">
@@ -182,24 +251,25 @@ export default function App() {
             species={selD.sp}
             status={selD.status}
             logs={selD.logs}
+            base={selD.base}
             today={selD.today}
             stake={selD.stake}
             readings={selD.stake ? readingsFor(plan, sel, days?.[0], now) : null}
             spot={selD.spot}
             analysis={sel.analysis}
             busy={busy}
-            suggestions={suggestionsFor(plan, state.plants, { x: sel.x, y: sel.y, size: footprint(selD.sp, plan.cell_ft), id: sel.id })}
+            suggestions={suggestionsFor(plan, state.plants, { x: sel.x, y: sel.y, size: sizeOf(plan, sel), id: sel.id })}
             onClose={() => setSelectedId(null)}
             onPlant={(iso) => update(sel.id, (p) => ({ ...p, status: 'planted', plantedOn: iso, logs: [], analysis: null }))}
             onCheckIn={checkIn}
             onRemove={(reason) => {
               setState((s) => ({
                 ...s,
-                journal: [...s.journal, { species: sel.species, plantedOn: sel.plantedOn, removedOn: new Date().toISOString().slice(0, 10), reason }],
+                journal: [...s.journal, { species: sel.species, plantedOn: sel.plantedOn, removedOn: localIso(), reason }],
               }));
               update(sel.id, (p) => ({ ...p, status: 'removed', logs: [], analysis: null }));
             }}
-            onReplace={(speciesId) => update(sel.id, (p) => ({ ...p, species: speciesId, status: 'planned', plantedOn: null, logs: [], analysis: null }))}
+            onReplace={(speciesId) => update(sel.id, (p) => ({ ...p, species: speciesId, size: undefined, status: 'planned', plantedOn: null, logs: [], analysis: null }))}
           />
         )}
       </div>

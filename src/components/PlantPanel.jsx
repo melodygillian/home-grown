@@ -2,17 +2,17 @@ import { useState } from 'react';
 import Flower from './Flower.jsx';
 import GrowthChart from './GrowthChart.jsx';
 import CheckIn from './CheckIn.jsx';
-import { STATUS, expectedScore } from '../lib/growth.js';
-import { SUN_LABEL, MOISTURE_LABEL, heightText, bloomText, footprint } from '../lib/catalog.js';
+import { STATUS, expectedScore, localIso } from '../lib/growth.js';
+import { SUN_LABEL, MOISTURE_LABEL, heightText, bloomText, sizeOf } from '../lib/catalog.js';
 
 const DAY = 86400000;
 
 export default function PlantPanel(props) {
-  const { plan, plant, species, status, logs, today, stake, readings, spot, suggestions, analysis, busy } = props;
+  const { plan, plant, species, status, logs, base, today, stake, readings, spot, suggestions, analysis, busy } = props;
   const [mode, setMode] = useState(status === 'removed' ? 'replace' : 'info');
   const [removedReason, setRemovedReason] = useState(null);
   const S = STATUS[status] || STATUS.planned;
-  const sizeFt = footprint(species, plan.cell_ft) * plan.cell_ft;
+  const sizeFt = sizeOf(plan, plant) * plan.cell_ft;
 
   return (
     <aside className="card panel" aria-label="Plant details">
@@ -43,17 +43,17 @@ export default function PlantPanel(props) {
             <div className="row-between">
               <h3 className="h3">Growth vs. expected</h3>
               <span className="strong">
-                {logs.length ? logs[logs.length - 1].score : '—'} <span className="muted">/ expected {Math.round(expectedScore(species, today))}</span>
+                {logs.length ? logs[logs.length - 1].score : '—'} <span className="muted">/ expected {Math.round(expectedScore(species, today, base))}</span>
               </span>
             </div>
-            <GrowthChart species={species} logs={logs} today={today} ring={S.ring} />
+            <GrowthChart species={species} logs={logs} today={today} base={base} ring={S.ring} />
             <div className="chart-key">
               <span><i style={{ background: S.ring }} />Your plant</span>
               <span><i className="dash" />Expected for this plant</span>
             </div>
             <p className="muted small">
               Growth score = size and health compared with a fully grown, healthy plant (100). It combines height with leaf color,
-              flowers, wilting, pests and disease.
+              flowers, wilting, pests and disease.{base != null && base !== 30 && ' Your first check-in set this plant’s starting point.'}
             </p>
           </section>
 
@@ -128,10 +128,10 @@ export default function PlantPanel(props) {
 }
 
 function PlantIt({ species, onPlant }) {
-  const todayIso = new Date().toISOString().slice(0, 10);
+  const todayIso = localIso();
   const [when, setWhen] = useState(todayIso);
   const opts = [['Today', 0], ['2 weeks ago', 14], ['1 month ago', 30], ['2 months ago', 60]];
-  const iso = (d) => new Date(Date.now() - d * DAY).toISOString().slice(0, 10);
+  const iso = (d) => localIso(new Date(Date.now() - d * DAY));
   return (
     <section className="sec">
       <p className="lead">This plant is in your plan but not planted yet. Once it’s in the ground, we’ll start tracking how it grows.</p>

@@ -50,6 +50,7 @@ async function callGemini(model, key, body) {
       contents: [{ role: 'user', parts }],
       generationConfig: { responseMimeType: 'application/json', responseSchema: SCHEMA, temperature: 0.2 },
     }),
+    signal: AbortSignal.timeout(35000),
   });
   if (!r.ok) {
     const text = await r.text();
@@ -74,6 +75,7 @@ export default async function handler(req, res) {
 
   const key = process.env.GEMINI_API_KEY;
   const fallback = (reason) => {
+    console.log('\n[Backup reader used]', reason);
     const r = readNoteLocally(body.note || '');
     return sendJson(res, 200, { source: 'fallback', reason, ...r });
   };
@@ -83,11 +85,14 @@ export default async function handler(req, res) {
   let lastErr;
   for (const model of models) {
     try {
+      const started = Date.now();
       const out = await callGemini(model, key, body);
+      console.log(`\n[Gemini ${model}] ${((Date.now() - started) / 1000).toFixed(1)}s · note: "${(body.note || '').slice(0, 80)}"${body.image ? ' + photo' : ''}\n→`, out);
       const { summary, advice, urgent, confidence, ...features } = out;
       return sendJson(res, 200, { source: 'gemini', model, features, summary, advice, urgent, confidence });
     } catch (err) {
       lastErr = err;
+      if (err.name === 'TimeoutError') err.message = 'Gemini took longer than 35 seconds.';
       if (err.status !== 404 && err.status !== 400) break; // only try the next model if this one doesn't exist
     }
   }

@@ -9,7 +9,7 @@ The project has two halves:
 
 | Part | What it does | Status |
 |---|---|---|
-| **1. Planner** | The gardener enters the yard's size and ZIP code and marks each grid square's sunlight and moisture. The app suggests native plants that fit, and each plant gets the space it needs. | Teammates, see [`PLAN_FORMAT.md`](PLAN_FORMAT.md) |
+| **1. Planner** (BayState Bloom) | The gardener draws the yard, maps sunlight and moisture on a 1-ft grid, and places FloraAPI native plants with spacing checks. | ✅ Connected: **Open in My Garden** sends the plan here |
 | **2. Garden (this repo)** | Turns the plan into a living map: tracks growth, reads check-ins with AI, gives weather alerts, and handles replacing plants. | ✅ Live |
 
 ---
@@ -118,22 +118,21 @@ The live site deploys automatically from `main` on **Vercel**. Every push update
 
 ---
 
-## 🤝 For the planner team
+## 🤝 How the two parts connect
 
-1. Read [`PLAN_FORMAT.md`](PLAN_FORMAT.md). The planner just needs to output that JSON.
-2. Suggest plants using the `id`s in `src/data/ma-native-plants.json`. Each plant lists which **sun** (`full_sun`, `part_shade`, `shade`) and **moisture** (`wet`, `wet_mesic`, `mesic`, `dry_mesic`, `dry`) conditions it tolerates.
-3. A plant takes up `size × size` grid squares, where `size = ceil(spread in ft ÷ square size in ft)`. You can import `footprint()` and `canPlace()` from `src/lib/catalog.js` instead of rewriting them.
-4. To hand off the plan, either:
-   - save it with `localStorage.setItem('gardenPlan', JSON.stringify(plan))` (if your page is on the same site), or
-   - offer a "Download plan" button that saves the JSON file, which the garden page can upload.
+1. In the planner, finish a garden and click **Open in My Garden** (Maintenance page or dashboard card).
+2. My Garden opens in a new tab with the plan inside the link, asks for a ZIP code, and shows the map. Every plant starts locked until it's planted.
+3. Backup: **Download plan** in the planner → **Upload a plan file** in My Garden.
 
-**Git workflow:** run `git pull` before starting. Keep your files in your own folder to avoid conflicts. Commit and push small, working changes.
+Details, field mappings and both JSON formats are in [`PLAN_FORMAT.md`](PLAN_FORMAT.md). Planner code: `src/utils/exportToGarden.ts`. My Garden code: `src/lib/importPlanner.js`.
+
+**Git workflow:** run `git pull` before starting, keep changes small, and commit and push working pieces.
 
 ---
 
 ## 🎬 2-minute demo script
 
-1. Enter a ZIP code → **Try the sample backyard**. Point out the rulers in feet and switch to the **Sunlight** and **Moisture** views.
+1. In the planner, open a finished garden → **Open in My Garden**. Enter a ZIP code. (Or use **Try the sample backyard**.) Point out the rulers in feet and switch to the **Sunlight** and **Moisture** views.
 2. Every plant is faded and locked. Tap **Butterfly weed** → **2 months ago** → **Yes, I planted it**. It's next to a sensor stake, so show the live readings and the growth curve.
 3. Tap **Wild bergamot**, which has no sensor. Plant it, then tap **Speak** and describe it. Gemini returns structured features, a new point appears on the chart, and the ring color updates.
 4. Go to **Settings → Use a sample summer heat-wave week** and hover over the days. The alerts name the plants that need water.

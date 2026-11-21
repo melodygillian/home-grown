@@ -6,7 +6,7 @@ import { sendJson } from './_http.js';
 const UA = 'SmartGardenHackathon/1.0 (student project)';
 
 async function getJson(url) {
-  const r = await fetch(url, { headers: { 'User-Agent': UA, Accept: 'application/geo+json, application/json' } });
+  const r = await fetch(url, { headers: { 'User-Agent': UA, Accept: 'application/geo+json, application/json' }, signal: AbortSignal.timeout(8000) });
   if (!r.ok) {
     const e = new Error(`${url} -> ${r.status}`);
     e.status = r.status;

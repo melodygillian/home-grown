@@ -8,18 +8,35 @@
 const DAY = 24 * 60 * 60 * 1000;
 export const START_PCT = 30; // a nursery-pot plant is roughly 30% of its mature height
 
-export function daysSince(iso, now = Date.now()) {
-  return Math.max(0, Math.round((now - new Date(iso).getTime()) / DAY));
+/** Today's date as YYYY-MM-DD in the gardener's own time zone (not UTC). */
+export function localIso(d = new Date()) {
+  const p = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
 }
 
-/** Expected growth score `t` days after planting (first growing season, ~120 days). */
-export function expectedScore(species, t) {
-  const end = Math.round((species.growth?.first_season ?? 0.7) * 100);
+/** Whole calendar days between a YYYY-MM-DD date and today, in local time. */
+export function daysSince(iso, now = Date.now()) {
+  const [y, m, d] = String(iso).slice(0, 10).split('-').map(Number);
+  const then = new Date(y, m - 1, d);
+  const n = new Date(now);
+  const today = new Date(n.getFullYear(), n.getMonth(), n.getDate());
+  return Math.max(0, Math.round((today - then) / DAY));
+}
+
+/**
+ * Expected growth score `t` days after planting (first growing season, ~120 days).
+ * `base` = the plant's starting score. Normally a small nursery plant (30), but if the
+ * gardener's first check-in shows a bigger plant, the curve starts from that instead.
+ */
+export function expectedScore(species, t, base = START_PCT) {
+  const end0 = Math.round((species.growth?.first_season ?? 0.7) * 100);
+  const gain = (end0 - START_PCT) * Math.max(0.08, Math.min(1, (125 - base) / 95));
+  const end = base + gain;
   const k = species.growth?.speed === 'fast' ? 0.075 : species.growth?.speed === 'slow' ? 0.045 : 0.06;
   const mid = 55;
   const raw = (x) => 1 / (1 + Math.exp(-k * (x - mid)));
   const f = (raw(Math.min(t, 150)) - raw(0)) / (raw(150) - raw(0));
-  return START_PCT + (end - START_PCT) * f;
+  return base + (end - base) * f;
 }
 
 /** Turn features (from Gemini or the fallback reader) into a growth score. */
@@ -52,11 +69,17 @@ export const STATUS = {
   removed: { label: 'Empty spot', ring: '#9C978B', glow: 'transparent', bg: '#EEECE6', fg: '#4F4B42' },
 };
 
+/** Starting score: the first check-in within a week of planting, otherwise a typical nursery plant. */
+export function baseScoreOf(logs) {
+  const first = (logs || []).find((l) => l.source === 'note' && l.day <= 7);
+  return first ? first.score : START_PCT;
+}
+
 export function statusOf(plant, species) {
   if (plant.status !== 'planted') return plant.status; // 'planned' | 'removed'
   const last = plant.logs?.[plant.logs.length - 1];
   if (!last) return 'ontrack';
-  const r = last.score / expectedScore(species, last.day);
+  const r = last.score / expectedScore(species, last.day, plant.base ?? START_PCT);
   let st = r >= 1.08 ? 'thriving' : r >= 0.9 ? 'ontrack' : r >= 0.75 ? 'attention' : 'risk';
   const f = last.features || {};
   const serious = (f.wilting ? 1 : 0) + (f.disease_signs ? 1 : 0) + (f.leaf_color === 'browning' ? 1 : 0) + (f.pest_damage ? 1 : 0);
