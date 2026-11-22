@@ -95,7 +95,7 @@ async function callGemini(model, key, body) {
       contents: [{ role: 'user', parts }],
       generationConfig: { responseMimeType: 'application/json', responseSchema: SCHEMA, temperature: 0.2 },
     }),
-    signal: AbortSignal.timeout(35000),
+    signal: AbortSignal.timeout(20000),
   });
   if (!r.ok) {
     const text = await r.text();
@@ -139,7 +139,8 @@ export default async function handler(req, res) {
   };
   if (!key) return fallback('GEMINI_API_KEY is not set on the server.');
 
-  const models = [process.env.GEMINI_MODEL, 'gemini-flash-latest', 'gemini-2.5-flash'].filter(Boolean);
+  // If one model is busy (Google returns 503 "high demand" or 429), try the next one.
+  const models = [...new Set([process.env.GEMINI_MODEL, 'gemini-2.5-flash', 'gemini-flash-latest', 'gemini-2.5-flash-lite'].filter(Boolean))];
   let lastErr;
   for (const model of models) {
     try {
@@ -150,8 +151,10 @@ export default async function handler(req, res) {
       return finish(res, body, { source: 'gemini', model, features, summary, advice, urgent, confidence, follow_up_question });
     } catch (err) {
       lastErr = err;
-      if (err.name === 'TimeoutError') err.message = 'Gemini took longer than 35 seconds.';
-      if (err.status !== 404 && err.status !== 400) break;
+      if (err.name === 'TimeoutError') err.message = `Gemini ${model} took longer than 20 seconds.`;
+      console.log(`\n[Gemini ${model} failed, trying the next model]`, String(err.message).slice(0, 160));
+      // A wrong or blocked API key won't work with any model, so stop early.
+      if (err.status === 401 || err.status === 403) break;
     }
   }
   console.error(lastErr);

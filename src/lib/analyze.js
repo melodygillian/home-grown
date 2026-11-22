@@ -7,7 +7,7 @@ export async function analyzeCheckIn(payload) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
-      signal: AbortSignal.timeout(45000), // never spin forever
+      signal: AbortSignal.timeout(65000), // never spin forever
     });
     const data = await r.json();
     if (!r.ok) throw new Error(data.error || 'Analysis failed');
