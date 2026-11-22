@@ -93,7 +93,13 @@ async function callGemini(model, key, body) {
     headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
     body: JSON.stringify({
       contents: [{ role: 'user', parts }],
-      generationConfig: { responseMimeType: 'application/json', responseSchema: SCHEMA, temperature: 0.2 },
+      generationConfig: {
+        responseMimeType: 'application/json',
+        responseSchema: SCHEMA,
+        temperature: 0.2,
+        // 2.5 models "think" before answering by default, which can take 20+ seconds. Skip it: this task is simple.
+        ...(model.startsWith('gemini-2.5') ? { thinkingConfig: { thinkingBudget: 0 } } : {}),
+      },
     }),
     signal: AbortSignal.timeout(20000),
   });
@@ -123,6 +129,15 @@ function finish(res, body, result) {
 }
 
 export default async function handler(req, res) {
+  try {
+    return await handle(req, res);
+  } catch (err) {
+    console.error('[analyze crashed]', err);
+    if (!res.headersSent) return sendJson(res, 200, { source: 'fallback', reason: 'Server error: ' + String(err?.message || err).slice(0, 150), ...readNoteLocally(req.body?.note || '') });
+  }
+}
+
+async function handle(req, res) {
   if (req.method !== 'POST') return sendJson(res, 405, { error: 'Use POST' });
   let body;
   try {
@@ -150,9 +165,10 @@ export default async function handler(req, res) {
       const { summary, advice, urgent, confidence, follow_up_question, ...features } = out;
       return finish(res, body, { source: 'gemini', model, features, summary, advice, urgent, confidence, follow_up_question });
     } catch (err) {
-      lastErr = err;
-      if (err.name === 'TimeoutError') err.message = `Gemini ${model} took longer than 20 seconds.`;
-      console.log(`\n[Gemini ${model} failed, trying the next model]`, String(err.message).slice(0, 160));
+      // Note: a timeout error's message is read-only, so we store our own copy instead of editing it.
+      const msg = err?.name === 'TimeoutError' ? `Gemini ${model} took longer than 20 seconds.` : String(err?.message || err);
+      lastErr = { message: msg, status: err?.status };
+      console.log(`\n[Gemini ${model} failed, trying the next model]`, msg.slice(0, 160));
       // A wrong or blocked API key won't work with any model, so stop early.
       if (err.status === 401 || err.status === 403) break;
     }
