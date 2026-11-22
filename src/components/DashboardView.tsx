@@ -23,16 +23,16 @@ export function DashboardView({
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   return (
-    <div className="max-w-[1360px] mx-auto px-4 sm:px-6 py-10 space-y-8">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#E3E8E4] pb-6">
+    <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#E6E2CC] pb-6">
         <div className="space-y-1">
-          <div className="text-xs font-medium text-[#4A5D52]">
+          <div className="text-xs font-medium text-[#4E6656]">
             Signed in as {userEmail} · Saved locally
           </div>
-          <h1 className="font-display text-3xl sm:text-4xl font-semibold text-[#14261C]">
+          <h1 className="font-display text-3xl sm:text-4xl font-medium text-[#30573C]">
             My Massachusetts Gardens
           </h1>
-          <p className="text-sm text-[#4A5D52]">
+          <p className="text-sm text-[#4E6656]">
             Open a saved planting map to refine spacing, or launch your Zone 5b–7a care tracker.
           </p>
         </div>
@@ -41,14 +41,14 @@ export function DashboardView({
           <button
             type="button"
             onClick={onLoadStarter}
-            className="px-4 py-2 text-sm font-semibold text-[#1B4332] bg-white hover:bg-[#EEF4F0] border border-[#CBD6CE] rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+            className="px-4 py-2 text-sm font-semibold text-[#30573C] bg-white hover:bg-[#F3F1DC] border border-[#CCC8A8] rounded-full transition-colors whitespace-nowrap shrink-0 cursor-pointer"
           >
             Load Sample Garden
           </button>
           <button
             type="button"
             onClick={onCreateNew}
-            className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-[#1B4332] hover:bg-[#2D6A4F] rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-[#30573C] hover:bg-[#3E6E4D] rounded-full transition-colors whitespace-nowrap shrink-0 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Create New Garden</span>
@@ -57,15 +57,15 @@ export function DashboardView({
       </div>
 
       {projects.length === 0 ? (
-        <div className="bg-white border border-[#E3E8E4] rounded-xl p-12 text-center max-w-xl mx-auto space-y-4">
-          <div className="w-12 h-12 rounded-xl bg-[#EEF4F0] text-[#1B4332] flex items-center justify-center mx-auto">
+        <div className="bg-white border border-[#E6E2CC] rounded-3xl p-12 text-center max-w-xl mx-auto space-y-4">
+          <div className="w-12 h-12 rounded-3xl bg-[#F3F1DC] text-[#30573C] flex items-center justify-center mx-auto">
             <Sprout className="w-6 h-6" />
           </div>
           <div className="space-y-1">
-            <h2 className="font-display text-2xl font-semibold text-[#14261C]">
+            <h2 className="font-display text-2xl font-semibold text-[#22392A]">
               No gardens mapped yet
             </h2>
-            <p className="text-sm text-[#4A5D52]">
+            <p className="text-sm text-[#4E6656]">
               Start by entering your backyard bed dimensions in feet, or load our 12 × 8 ft sample
               Massachusetts pollinator and rain-garden border to explore immediately.
             </p>
@@ -74,14 +74,14 @@ export function DashboardView({
             <button
               type="button"
               onClick={onCreateNew}
-              className="px-4 py-2.5 text-sm font-semibold text-white bg-[#1B4332] hover:bg-[#2D6A4F] rounded-lg cursor-pointer"
+              className="px-4 py-2.5 text-sm font-semibold text-white bg-[#30573C] hover:bg-[#3E6E4D] rounded-full cursor-pointer"
             >
               Create First Garden
             </button>
             <button
               type="button"
               onClick={onLoadStarter}
-              className="px-4 py-2.5 text-sm font-semibold text-[#1B4332] bg-[#F5F8F5] hover:bg-[#E7F0EA] border border-[#CBD6CE] rounded-lg cursor-pointer"
+              className="px-4 py-2.5 text-sm font-semibold text-[#30573C] bg-[#F5F8F5] hover:bg-[#EEEBD2] border border-[#CCC8A8] rounded-full cursor-pointer"
             >
               Try Sample 12 × 8 ft Garden
             </button>
@@ -97,44 +97,44 @@ export function DashboardView({
             return (
               <article
                 key={project.id}
-                className="bg-white border border-[#E3E8E4] rounded-xl p-5 flex flex-col justify-between space-y-5"
+                className="bg-white border border-[#E6E2CC] rounded-3xl p-5 flex flex-col justify-between space-y-5"
               >
                 <div className="space-y-3">
                   <div className="space-y-1">
-                    <div className="flex items-center justify-between gap-2 text-xs text-[#4A5D52]">
+                    <div className="flex items-center justify-between gap-2 text-xs text-[#4E6656]">
                       <span>
                         Zone {project.zone} · Created {project.createdAt}
                       </span>
                       <span
                         className={`font-semibold ${
-                          project.completed ? 'text-[#1B4332]' : 'text-[#92400E]'
+                          project.completed ? 'text-[#30573C]' : 'text-[#92400E]'
                         }`}
                       >
                         {project.completed ? 'Active Maintenance' : 'Draft Plan'}
                       </span>
                     </div>
-                    <h2 className="font-display text-xl font-semibold text-[#14261C] truncate">
+                    <h2 className="font-display text-xl font-semibold text-[#22392A] truncate">
                       {project.name}
                     </h2>
                   </div>
 
                   {/* Unboxed Tabular Metrics Row */}
-                  <div className="grid grid-cols-3 gap-3 py-3 border-y border-[#EEF2EF] text-xs">
+                  <div className="grid grid-cols-3 gap-3 py-3 border-y border-[#F6F2DF] text-xs">
                     <div>
-                      <div className="text-[#5B6E62]">Dimensions</div>
-                      <div className="font-mono tabular-nums font-semibold text-[#14261C] mt-0.5">
+                      <div className="text-[#5A705F]">Dimensions</div>
+                      <div className="font-mono tabular-nums font-semibold text-[#22392A] mt-0.5">
                         {project.width} × {project.height} ft
                       </div>
                     </div>
                     <div>
-                      <div className="text-[#5B6E62]">Planted</div>
-                      <div className="font-mono tabular-nums font-semibold text-[#14261C] mt-0.5">
+                      <div className="text-[#5A705F]">Planted</div>
+                      <div className="font-mono tabular-nums font-semibold text-[#22392A] mt-0.5">
                         {project.placements.length} ({uniqueSpecies} sp.)
                       </div>
                     </div>
                     <div>
-                      <div className="text-[#5B6E62]">Care Tasks</div>
-                      <div className="font-mono tabular-nums font-semibold text-[#14261C] mt-0.5">
+                      <div className="text-[#5A705F]">Care Tasks</div>
+                      <div className="font-mono tabular-nums font-semibold text-[#22392A] mt-0.5">
                         {completedTasks} / {project.tasks.length}
                       </div>
                     </div>
@@ -153,7 +153,7 @@ export function DashboardView({
                     ) : (
                       <>
                         <CheckCircle2 className="w-3.5 h-3.5 text-[#15803D] shrink-0" />
-                        <span className="text-[#35473C]">
+                        <span className="text-[#34503D]">
                           {project.placements.length > 0
                             ? 'Zero mature spread conflicts'
                             : 'Ready for environmental mapping'}
@@ -168,7 +168,7 @@ export function DashboardView({
                   <button
                     type="button"
                     onClick={() => onOpenProject(project.id, 'tracker')}
-                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 text-base font-semibold text-white bg-[#1B4332] hover:bg-[#2D6A4F] rounded-lg transition-colors cursor-pointer"
+                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 text-base font-semibold text-white bg-[#30573C] hover:bg-[#3E6E4D] rounded-lg transition-colors cursor-pointer"
                   >
                     <Sprout className="w-5 h-5" />
                     <span>Track this garden</span>
@@ -178,7 +178,7 @@ export function DashboardView({
                     <button
                       type="button"
                       onClick={() => onOpenProject(project.id, 'designer')}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold text-[#1B4332] bg-white hover:bg-[#EEF4F0] border border-[#CBD6CE] rounded-lg transition-colors whitespace-nowrap cursor-pointer"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold text-[#30573C] bg-white hover:bg-[#F3F1DC] border border-[#CCC8A8] rounded-lg transition-colors whitespace-nowrap cursor-pointer"
                     >
                       <Map className="w-4 h-4" />
                       <span>Edit Map</span>
@@ -187,7 +187,7 @@ export function DashboardView({
                     <button
                       type="button"
                       onClick={() => onOpenProject(project.id, 'maintenance')}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold text-[#1B4332] bg-[#F2F7F4] hover:bg-[#E4EFE8] border border-[#CFE0D5] rounded-lg transition-colors whitespace-nowrap cursor-pointer"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold text-[#30573C] bg-[#F7F5E5] hover:bg-[#E4EFE8] border border-[#CFE0D5] rounded-lg transition-colors whitespace-nowrap cursor-pointer"
                     >
                       <ClipboardList className="w-4 h-4" />
                       Checklist
@@ -209,7 +209,7 @@ export function DashboardView({
                       <button
                         type="button"
                         onClick={() => setConfirmDeleteId(null)}
-                        className="px-2 py-1.5 text-xs text-[#4A5D52] hover:text-[#14261C] cursor-pointer"
+                        className="px-2 py-1.5 text-xs text-[#4E6656] hover:text-[#22392A] cursor-pointer"
                       >
                         Cancel
                       </button>
@@ -219,7 +219,7 @@ export function DashboardView({
                       type="button"
                       onClick={() => setConfirmDeleteId(project.id)}
                       aria-label={`Delete ${project.name}`}
-                      className="p-2 text-[#6B7D72] hover:text-[#DC2626] hover:bg-[#FEF2F2] rounded-lg transition-colors cursor-pointer"
+                      className="p-2 text-[#6A7E6C] hover:text-[#DC2626] hover:bg-[#FEF2F2] rounded-lg transition-colors cursor-pointer"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>

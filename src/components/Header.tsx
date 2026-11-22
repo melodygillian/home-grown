@@ -12,6 +12,11 @@ interface HeaderProps {
   onTrackGarden: () => void;
 }
 
+/**
+ * "home grown" header from the team Figma: a strip of the blurred wildflower photo,
+ * the two-line white wordmark, and white outlined pill buttons.
+ * On the home page it floats transparently over the full-screen hero photo.
+ */
 export function Header({
   currentView,
   userEmail,
@@ -22,140 +27,123 @@ export function Header({
   onPrimaryAction,
   onTrackGarden,
 }: HeaderProps) {
-  const navLinkClass = (active: boolean) =>
-    `text-[15px] font-medium transition-colors whitespace-nowrap shrink-0 cursor-pointer pb-0.5 ${
-      active
-        ? 'text-[#14261C] border-b-2 border-[#1B4332]'
-        : 'text-[#4A5D52] hover:text-[#14261C]'
+  const onHome = currentView === 'home';
+
+  const navLink = (active: boolean) =>
+    `text-[16px] font-medium whitespace-nowrap shrink-0 cursor-pointer pb-0.5 transition-opacity ${
+      active ? 'text-white border-b-2 border-white' : 'text-white/85 hover:text-white'
     }`;
 
   return (
-    <header className="sticky top-0 z-40 bg-[#F9FAF8]/95 backdrop-blur-sm border-b border-[#E3E8E4]">
-      <div className="max-w-[1360px] mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-6">
-        {/* Zone 1: Single-line Brand Wordmark */}
-        <button
-          type="button"
-          onClick={() => onNavigate('home')}
-          className="font-display text-xl font-bold tracking-tight text-[#1B4332] whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1B4332]"
-        >
-          BayState Bloom
-        </button>
-
-        {/* Zone 2: 4-5 concise single-line text links */}
-        <nav aria-label="Primary navigation" className="hidden lg:flex items-center gap-7">
+    <header
+      className={
+        onHome
+          ? 'absolute inset-x-0 top-0 z-40'
+          : 'sticky top-0 z-40 hg-photo shadow-[0_2px_12px_rgba(0,0,0,0.15)]'
+      }
+    >
+      <div className={onHome ? '' : 'bg-black/15'}>
+        <div className="max-w-[1440px] mx-auto px-5 lg:px-8 h-[76px] flex items-center justify-between gap-5">
           <button
             type="button"
             onClick={() => onNavigate('home')}
-            className={navLinkClass(currentView === 'home')}
+            className="text-left text-white font-bold text-[26px] leading-[0.9] tracking-tight drop-shadow-sm shrink-0 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+            aria-label="home grown, go to home page"
           >
-            Mission
+            home
+            <br />
+            grown
           </button>
-          <button
-            type="button"
-            onClick={() => onNavigate('catalog')}
-            className={navLinkClass(currentView === 'catalog')}
-          >
-            Plant Guide
+
+          <nav aria-label="Primary navigation" className="hidden lg:flex items-center gap-6 drop-shadow-sm">
+            <button type="button" onClick={() => onNavigate('home')} className={navLink(onHome)}>
+              mission
+            </button>
+            <button
+              type="button"
+              onClick={() => onNavigate('catalog')}
+              className={navLink(currentView === 'catalog')}
+            >
+              plant guide
+            </button>
+            <button
+              type="button"
+              onClick={() => (userEmail ? onNavigate('dashboard') : onOpenAuth('login'))}
+              className={navLink(currentView === 'dashboard')}
+            >
+              my gardens
+            </button>
+            {hasActiveProject && userEmail && (
+              <button
+                type="button"
+                onClick={() => onNavigate('designer')}
+                className={navLink(currentView === 'designer' || currentView === 'maintenance')}
+              >
+                workspace
+              </button>
+            )}
+          </nav>
+
+          <div className="flex items-center gap-2.5 shrink-0">
+            {!onHome && (
+              <>
+                <button
+                  type="button"
+                  onClick={onTrackGarden}
+                  aria-current={currentView === 'tracker' ? 'page' : undefined}
+                  className="hg-pill-light inline-flex items-center gap-2 px-4 sm:px-5 h-11 text-[16px] whitespace-nowrap cursor-pointer"
+                >
+                  <Sprout className="w-5 h-5" />
+                  <span className="sm:hidden">track</span>
+                  <span className="hidden sm:inline">track my garden</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={onPrimaryAction}
+                  className="inline-flex items-center gap-2 px-4 sm:px-5 h-11 text-[16px] font-bold rounded-full bg-white text-[#30573C] hover:bg-[#FFFDF3] border-2 border-white transition-colors whitespace-nowrap cursor-pointer"
+                >
+                  <Plus className="w-5 h-5" />
+                  <span className="sm:hidden">new</span>
+                  <span className="hidden sm:inline">new garden</span>
+                </button>
+              </>
+            )}
+            {userEmail ? (
+              <button
+                type="button"
+                onClick={onLogout}
+                className="hg-pill-light px-4 h-11 text-[16px] whitespace-nowrap cursor-pointer"
+              >
+                sign out
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => onOpenAuth('login')}
+                className="hg-pill-light px-5 h-11 text-[16px] whitespace-nowrap cursor-pointer"
+              >
+                log in
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Small-screen navigation row */}
+        <div className="lg:hidden px-5 pb-2 flex items-center gap-5 overflow-x-auto text-sm font-medium text-white/90">
+          <button type="button" onClick={() => onNavigate('home')} className="whitespace-nowrap shrink-0">
+            mission
+          </button>
+          <button type="button" onClick={() => onNavigate('catalog')} className="whitespace-nowrap shrink-0">
+            plant guide
           </button>
           <button
             type="button"
             onClick={() => (userEmail ? onNavigate('dashboard') : onOpenAuth('login'))}
-            className={navLinkClass(currentView === 'dashboard')}
-          >
-            My Gardens
-          </button>
-          {hasActiveProject && userEmail && (
-            <button
-              type="button"
-              onClick={() => onNavigate('designer')}
-              className={navLinkClass(currentView === 'designer' || currentView === 'maintenance')}
-            >
-              Workspace
-            </button>
-          )}
-          {userEmail ? (
-            <button
-              type="button"
-              onClick={onLogout}
-              className="text-sm font-medium text-[#4A5D52] hover:text-[#14261C] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
-            >
-              Sign Out
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => onOpenAuth('login')}
-              className="text-sm font-medium text-[#4A5D52] hover:text-[#14261C] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
-            >
-              Log In
-            </button>
-          )}
-        </nav>
-
-        {/* Zone 3: The two main actions */}
-        <div className="flex items-center gap-2.5 shrink-0">
-          <button
-            type="button"
-            onClick={onTrackGarden}
-            aria-current={currentView === 'tracker' ? 'page' : undefined}
-            className={`inline-flex items-center gap-2 px-4 sm:px-5 py-3 text-base font-semibold rounded-lg border-2 transition-colors whitespace-nowrap cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B4332] ${
-              currentView === 'tracker'
-                ? 'bg-[#E7F0EA] border-[#1B4332] text-[#14261C]'
-                : 'bg-white border-[#1B4332] text-[#1B4332] hover:bg-[#EEF4F0]'
-            }`}
-          >
-            <Sprout className="w-5 h-5" />
-            <span className="sm:hidden">Track</span>
-            <span className="hidden sm:inline">Track My Garden</span>
-          </button>
-          <button
-            type="button"
-            onClick={onPrimaryAction}
-            className="inline-flex items-center gap-2 px-4 sm:px-5 py-3 text-base font-semibold text-white bg-[#1B4332] hover:bg-[#2D6A4F] border-2 border-[#1B4332] rounded-lg transition-colors whitespace-nowrap cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B4332]"
-          >
-            <Plus className="w-5 h-5" />
-            <span className="sm:hidden">New</span>
-            <span className="hidden sm:inline">{userEmail ? 'New Garden' : 'Start a Garden'}</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Compact mobile navigation row */}
-      <div className="lg:hidden border-t border-[#E3E8E4] px-4 py-2 flex items-center gap-5 overflow-x-auto text-xs font-medium text-[#4A5D52]">
-        <button
-          type="button"
-          onClick={() => onNavigate('home')}
-          className={`whitespace-nowrap shrink-0 ${currentView === 'home' ? 'text-[#1B4332] font-semibold' : ''}`}
-        >
-          Mission
-        </button>
-        <button
-          type="button"
-          onClick={() => onNavigate('catalog')}
-          className={`whitespace-nowrap shrink-0 ${currentView === 'catalog' ? 'text-[#1B4332] font-semibold' : ''}`}
-        >
-          Plant Guide
-        </button>
-        <button
-          type="button"
-          onClick={() => (userEmail ? onNavigate('dashboard') : onOpenAuth('login'))}
-          className={`whitespace-nowrap shrink-0 ${currentView === 'dashboard' ? 'text-[#1B4332] font-semibold' : ''}`}
-        >
-          My Gardens
-        </button>
-        {userEmail ? (
-          <button type="button" onClick={onLogout} className="whitespace-nowrap shrink-0">
-            Sign Out
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={() => onOpenAuth('login')}
             className="whitespace-nowrap shrink-0"
           >
-            Log In
+            my gardens
           </button>
-        )}
+        </div>
       </div>
     </header>
   );

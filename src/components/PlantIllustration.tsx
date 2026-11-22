@@ -16,21 +16,21 @@ export function PlantIllustration({ plant, size = 40, className = '' }: PlantIll
         className={className}
         aria-hidden="true"
       >
-        <circle cx="22" cy="22" r="18" fill="#1B4332" opacity="0.16" />
+        <circle cx="22" cy="22" r="18" fill="#30573C" opacity="0.16" />
         {/* Basal leaves */}
         <path
           d="M22 22 L10 12 M22 22 L34 12 M22 22 L36 24 M22 22 L31 35 M22 22 L13 35 M22 22 L8 24"
-          stroke="#1B4332"
+          stroke="#30573C"
           strokeWidth="2.2"
           strokeLinecap="round"
           opacity="0.55"
         />
         {/* 5 petals */}
-        <circle cx="22" cy="12" r="5.5" fill={plant.color} stroke="#14261C" strokeWidth="0.9" />
-        <circle cx="31.5" cy="19" r="5.5" fill={plant.color} stroke="#14261C" strokeWidth="0.9" />
-        <circle cx="28" cy="30" r="5.5" fill={plant.color} stroke="#14261C" strokeWidth="0.9" />
-        <circle cx="16" cy="30" r="5.5" fill={plant.color} stroke="#14261C" strokeWidth="0.9" />
-        <circle cx="12.5" cy="19" r="5.5" fill={plant.color} stroke="#14261C" strokeWidth="0.9" />
+        <circle cx="22" cy="12" r="5.5" fill={plant.color} stroke="#22392A" strokeWidth="0.9" />
+        <circle cx="31.5" cy="19" r="5.5" fill={plant.color} stroke="#22392A" strokeWidth="0.9" />
+        <circle cx="28" cy="30" r="5.5" fill={plant.color} stroke="#22392A" strokeWidth="0.9" />
+        <circle cx="16" cy="30" r="5.5" fill={plant.color} stroke="#22392A" strokeWidth="0.9" />
+        <circle cx="12.5" cy="19" r="5.5" fill={plant.color} stroke="#22392A" strokeWidth="0.9" />
         {/* Center */}
         <circle cx="22" cy="22" r="4.8" fill={plant.accentColor} stroke="#78350F" strokeWidth="0.9" />
         <circle cx="22" cy="22" r="1.8" fill="#78350F" />
@@ -62,7 +62,7 @@ export function PlantIllustration({ plant, size = 40, className = '' }: PlantIll
           strokeWidth="2"
           strokeLinecap="round"
         />
-        <ellipse cx="22" cy="36" rx="8.5" ry="3" fill="#2D6A4F" />
+        <ellipse cx="22" cy="36" rx="8.5" ry="3" fill="#3E6E4D" />
       </svg>
     );
   }
@@ -76,15 +76,15 @@ export function PlantIllustration({ plant, size = 40, className = '' }: PlantIll
         className={className}
         aria-hidden="true"
       >
-        <circle cx="22" cy="23" r="16" fill="#1B4332" stroke="#14261C" strokeWidth="1.2" />
-        <circle cx="15" cy="19" r="8" fill="#2D6A4F" />
-        <circle cx="29" cy="19" r="8" fill="#2D6A4F" />
+        <circle cx="22" cy="23" r="16" fill="#30573C" stroke="#22392A" strokeWidth="1.2" />
+        <circle cx="15" cy="19" r="8" fill="#3E6E4D" />
+        <circle cx="29" cy="19" r="8" fill="#3E6E4D" />
         <circle cx="22" cy="14" r="7" fill="#40916C" />
-        <circle cx="22" cy="27" r="7.5" fill="#2D6A4F" />
+        <circle cx="22" cy="27" r="7.5" fill="#3E6E4D" />
         {/* Flowers / berries */}
-        <circle cx="15" cy="15" r="2.6" fill={plant.color} stroke="#14261C" strokeWidth="0.6" />
-        <circle cx="28" cy="17" r="2.6" fill={plant.color} stroke="#14261C" strokeWidth="0.6" />
-        <circle cx="22" cy="25" r="2.6" fill={plant.color} stroke="#14261C" strokeWidth="0.6" />
+        <circle cx="15" cy="15" r="2.6" fill={plant.color} stroke="#22392A" strokeWidth="0.6" />
+        <circle cx="28" cy="17" r="2.6" fill={plant.color} stroke="#22392A" strokeWidth="0.6" />
+        <circle cx="22" cy="25" r="2.6" fill={plant.color} stroke="#22392A" strokeWidth="0.6" />
         <circle cx="14" cy="26" r="2.2" fill={plant.accentColor} />
         <circle cx="30" cy="26" r="2.2" fill={plant.accentColor} />
       </svg>

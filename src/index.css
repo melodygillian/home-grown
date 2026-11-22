@@ -1,16 +1,21 @@
 @import "tailwindcss";
 
 @theme {
-  --font-display: "Fraunces", Georgia, serif;
-  --font-sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: "Rubik", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-sans: "Rubik", -apple-system, BlinkMacSystemFont, sans-serif;
+  --color-hg-cream: #fffdf3;
+  --color-hg-green: #30573c;
+  --color-hg-pink: #ff3284;
+  --color-hg-rose: #df9ab6;
+  --color-hg-sage: #cdd3a1;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 }
 
 @layer base {
   body {
     font-family: var(--font-sans);
-    background-color: #f9faf8;
-    color: #14261c;
+    background-color: #fffdf3;
+    color: #22392a;
   }
 
   h1,
@@ -18,15 +23,17 @@
   h3,
   .font-display {
     font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.01em;
   }
 }
 
 /* Tactile backyard lawn canvas and FloraAPI environmental overlay patterns (hue + pattern for accessibility) */
 .backyard-turf {
-  background-color: #4f8a42;
+  background-color: #cdd3a1;
   background-image:
-    radial-gradient(rgba(255, 255, 255, 0.09) 1px, transparent 0),
-    radial-gradient(rgba(20, 38, 28, 0.1) 1px, transparent 0);
+    radial-gradient(rgba(255, 255, 255, 0.18) 1px, transparent 0),
+    radial-gradient(rgba(48, 87, 60, 0.12) 1px, transparent 0);
   background-size: 14px 14px;
   background-position: 0 0, 7px 7px;
 }
@@ -88,5 +95,105 @@
   *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------- home grown design (from the team Figma) ---------- */
+
+/* Blurred wildflower photo used in the header strip and the home hero */
+.hg-photo {
+  background-image: url('/design/hero-wildflowers.jpg');
+  background-size: cover;
+  background-position: center 30%;
+}
+
+/* Outlined pill button that sits on the photo; fills white on hover */
+.hg-pill-light {
+  border: 2px solid #fff;
+  color: #fff;
+  border-radius: 9999px;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0);
+  transition: background-color 0.25s ease, color 0.25s ease, transform 0.25s ease;
+}
+.hg-pill-light:hover,
+.hg-pill-light:focus-visible,
+.hg-pill-light[aria-current='page'] {
+  background: #fff;
+  color: #30573c;
+}
+.hg-pill-light:active {
+  transform: scale(0.97);
+}
+
+/* Giant see-through "native garden" title */
+.hg-hero-title {
+  color: rgba(255, 255, 255, 0.51);
+  font-weight: 400;
+  line-height: 0.8;
+  letter-spacing: -0.03em;
+  text-shadow: 0 0 1px rgba(255, 255, 255, 0.6);
+}
+
+/* Highlighted words in the mission statement */
+.hg-mark {
+  color: #ff3284;
+}
+
+/* Gentle entrance animations (turned off for people who prefer less motion) */
+@keyframes hg-rise {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes hg-drift {
+  from {
+    transform: scale(1.08);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+.hg-rise {
+  animation: hg-rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.hg-rise-2 {
+  animation: hg-rise 0.9s 0.25s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.hg-rise-3 {
+  animation: hg-rise 0.9s 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.hg-drift {
+  animation: hg-drift 6s ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hg-rise,
+  .hg-rise-2,
+  .hg-rise-3,
+  .hg-drift {
+    animation: none;
+  }
+}
+
+/* Slowly scrolling "DIY DIY DIY" column beside the mission panel */
+@keyframes hg-diy-scroll {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-50%);
+  }
+}
+.hg-diy-track {
+  animation: hg-diy-scroll 60s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hg-diy-track {
+    animation: none;
   }
 }

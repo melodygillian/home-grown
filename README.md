@@ -1,9 +1,9 @@
-# 🌱 BayState Bloom: plan a Massachusetts native garden, then help it grow
+# 🌱 home grown: plan a Massachusetts native garden, then help it grow
 
 **Live site:** https://smart-garden-two.vercel.app
 **Built at:** WHACK 2026 (Wellesley Hackathon)
 
-Most smart-garden tools are built for tech-savvy hobbyists. BayState Bloom is built for everyone, including older gardeners and first-timers. It works in two steps, on one website, under one account:
+Most smart-garden tools are built for tech-savvy hobbyists. home grown is built for everyone, including older gardeners and first-timers. It works in two steps, on one website, under one account:
 
 | Step | What the gardener does |
 |---|---|

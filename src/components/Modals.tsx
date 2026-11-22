@@ -35,13 +35,13 @@ export function AuthModal({
       aria-modal="true"
       aria-labelledby="auth-modal-heading"
     >
-      <div className="bg-white border border-[#E3E8E4] rounded-xl w-full max-w-md p-6 shadow-xl space-y-5">
+      <div className="bg-white border border-[#E6E2CC] rounded-3xl w-full max-w-md p-6 shadow-xl space-y-5">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 id="auth-modal-heading" className="font-display text-xl font-semibold text-[#14261C]">
+            <h2 id="auth-modal-heading" className="font-display text-xl font-semibold text-[#22392A]">
               {mode === 'login' ? 'Log In to Your Gardens' : 'Create Gardener Account'}
             </h2>
-            <p className="text-xs text-[#4A5D52] mt-1">
+            <p className="text-xs text-[#4E6656] mt-1">
               Gardens, grid layers, and seasonal care logs save directly to your browser storage.
             </p>
           </div>
@@ -49,7 +49,7 @@ export function AuthModal({
             type="button"
             onClick={onClose}
             aria-label="Close dialog"
-            className="p-1.5 text-[#4A5D52] hover:text-[#14261C] rounded-lg hover:bg-[#F2F5F2] cursor-pointer"
+            className="p-1.5 text-[#4E6656] hover:text-[#22392A] rounded-lg hover:bg-[#F8F5E6] cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -63,7 +63,7 @@ export function AuthModal({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
-            <label htmlFor="auth-email-input" className="block text-xs font-semibold text-[#14261C]">
+            <label htmlFor="auth-email-input" className="block text-xs font-semibold text-[#22392A]">
               Email Address
             </label>
             <input
@@ -73,12 +73,12 @@ export function AuthModal({
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="gardener@mass.org"
-              className="w-full px-3 py-2 text-sm bg-[#F9FAF8] border border-[#D4DDD7] rounded-lg focus:outline-none focus:border-[#1B4332]"
+              className="w-full px-3 py-2 text-sm bg-[#FFFDF3] border border-[#D8D4B8] rounded-lg focus:outline-none focus:border-[#30573C]"
             />
           </div>
 
           <div className="space-y-1.5">
-            <label htmlFor="auth-pw-input" className="block text-xs font-semibold text-[#14261C]">
+            <label htmlFor="auth-pw-input" className="block text-xs font-semibold text-[#22392A]">
               Password
             </label>
             <input
@@ -89,36 +89,36 @@ export function AuthModal({
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Minimum 4 characters"
-              className="w-full px-3 py-2 text-sm bg-[#F9FAF8] border border-[#D4DDD7] rounded-lg focus:outline-none focus:border-[#1B4332]"
+              className="w-full px-3 py-2 text-sm bg-[#FFFDF3] border border-[#D8D4B8] rounded-lg focus:outline-none focus:border-[#30573C]"
             />
           </div>
 
           <button
             type="submit"
-            className="w-full py-2.5 px-4 text-sm font-semibold text-white bg-[#1B4332] hover:bg-[#2D6A4F] rounded-lg transition-colors cursor-pointer"
+            className="w-full py-2.5 px-4 text-sm font-semibold text-white bg-[#30573C] hover:bg-[#3E6E4D] rounded-full transition-colors cursor-pointer"
           >
             {mode === 'login' ? 'Log In' : 'Create Account'}
           </button>
         </form>
 
-        <div className="pt-3 border-t border-[#EEF2EF] space-y-3">
+        <div className="pt-3 border-t border-[#F6F2DF] space-y-3">
           <button
             type="button"
             onClick={onQuickDemo}
-            className="w-full py-2 px-4 text-xs font-semibold text-[#1B4332] bg-[#F2F7F4] hover:bg-[#E4EFE8] border border-[#CFE0D5] rounded-lg transition-colors cursor-pointer"
+            className="w-full py-2 px-4 text-xs font-semibold text-[#30573C] bg-[#F7F5E5] hover:bg-[#E4EFE8] border border-[#CFE0D5] rounded-full transition-colors cursor-pointer"
           >
             Continue with Sample Massachusetts Garden
           </button>
 
-          <p className="text-xs text-center text-[#4A5D52]">
-            {mode === 'login' ? 'New to BayState Bloom? ' : 'Already have an account? '}
+          <p className="text-xs text-center text-[#4E6656]">
+            {mode === 'login' ? 'New to home grown? ' : 'Already have an account? '}
             <button
               type="button"
               onClick={() => {
                 setError(null);
                 onSwitchMode(mode === 'login' ? 'signup' : 'login');
               }}
-              className="font-semibold text-[#1B4332] hover:underline cursor-pointer"
+              className="font-semibold text-[#30573C] hover:underline cursor-pointer"
             >
               {mode === 'login' ? 'Create an account' : 'Log in instead'}
             </button>
@@ -131,128 +131,174 @@ export function AuthModal({
 
 interface NewProjectModalProps {
   onClose: () => void;
-  onCreate: (name: string, width: number, height: number, zone: MAZone) => void;
+  onCreate: (
+    name: string,
+    width: number,
+    height: number,
+    zone: MAZone,
+    zip: string,
+    place: { city: string; state: string } | null
+  ) => void;
 }
 
+/** Rough USDA zone for a Massachusetts ZIP code (by its first 3 digits). */
+export function zoneForZip(zip: string): MAZone {
+  const p = Number(zip.slice(0, 3));
+  if (p === 12) return '5b'; // Berkshires
+  if (p >= 10 && p <= 16) return '6a'; // Pioneer Valley & central MA
+  if (p >= 25 && p <= 27) return '7a'; // Cape, islands, South Coast
+  return '6b'; // Greater Boston, MetroWest, North & South Shore
+}
+
+/**
+ * "create a new garden:" pop-up from the team Figma:
+ * garden name, dimensions (width x / length y in feet) and ZIP code, then "build garden".
+ * Asking for the ZIP here means weather alerts are ready as soon as the garden is planted.
+ */
 export function NewProjectModal({ onClose, onCreate }: NewProjectModalProps) {
   const [name, setName] = useState('');
-  const [width, setWidth] = useState(10);
-  const [height, setHeight] = useState(8);
-  const [zone, setZone] = useState<MAZone>('6a');
+  const [width, setWidth] = useState('');
+  const [height, setHeight] = useState('');
+  const [zip, setZip] = useState('');
+  const [err, setErr] = useState('');
+  const [busy, setBusy] = useState(false);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    const cleanName = name.trim() || 'Massachusetts Native Border';
+    if (!/^\d{5}$/.test(zip)) {
+      setErr('Please type a 5-digit ZIP code, like 02481.');
+      return;
+    }
+    setErr('');
+    setBusy(true);
+    let place: { city: string; state: string } | null = null;
+    try {
+      const r = await fetch(`/api/weather?zip=${zip}`, { signal: AbortSignal.timeout(12000) });
+      const d = await r.json().catch(() => ({}));
+      if (r.status === 404 || r.status === 400) {
+        setErr(d.error || 'We couldn’t find that ZIP code. Please check it.');
+        setBusy(false);
+        return;
+      }
+      if (d.place) place = { city: d.place.city, state: d.place.state };
+    } catch {
+      // Weather lookup is down: still build the garden, the forecast can load later.
+    }
+    const cleanName = name.trim() || 'my native garden';
     const w = Math.max(4, Math.min(20, Number(width) || 10));
     const h = Math.max(4, Math.min(16, Number(height) || 8));
-    onCreate(cleanName, w, h, zone);
+    onCreate(cleanName, w, h, zoneForZip(zip), zip, place);
   };
+
+  const field =
+    'w-full h-14 px-5 text-[20px] text-[#30573C] placeholder:text-[#73A384]/70 bg-[#FFFDF3] border-[2.5px] border-[#30573C] rounded-full focus:outline-none focus:ring-4 focus:ring-[#30573C]/15';
+  const label = 'block text-[26px] leading-tight text-[#30573C] mb-2';
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-[#0D1B14]/55 backdrop-blur-[2px] flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 bg-[#0D1B14]/45 backdrop-blur-[3px] flex items-center justify-center p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="new-garden-heading"
     >
-      <div className="bg-white border border-[#E3E8E4] rounded-xl w-full max-w-md p-6 shadow-xl space-y-5">
+      <div className="hg-rise bg-[#FFFDF3] border-[3px] border-[#30573C] rounded-[40px] w-full max-w-[900px] max-h-[calc(100vh-32px)] overflow-y-auto px-8 sm:px-10 py-7 shadow-2xl">
         <div className="flex items-start justify-between gap-4">
-          <div>
-            <h2 id="new-garden-heading" className="font-display text-xl font-semibold text-[#14261C]">
-              Create a New Native Garden
-            </h2>
-            <p className="text-xs text-[#4A5D52] mt-1">
-              Each grid square represents 1 ft × 1 ft of Massachusetts backyard space.
-            </p>
-          </div>
+          <h2 id="new-garden-heading" className="text-[clamp(28px,3vw,38px)] font-medium text-[#30573C] leading-tight">
+            create a new garden:
+          </h2>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close dialog"
-            className="p-1.5 text-[#4A5D52] hover:text-[#14261C] rounded-lg hover:bg-[#F2F5F2] cursor-pointer"
+            aria-label="Close"
+            className="p-2 text-[#30573C] hover:bg-[#F3F1DC] rounded-full cursor-pointer"
           >
-            <X className="w-4 h-4" />
+            <X className="w-7 h-7" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-1.5">
-            <label htmlFor="garden-name-input" className="block text-xs font-semibold text-[#14261C]">
-              Garden Name
+        <form onSubmit={handleSubmit} className="mt-4 space-y-5">
+          <div>
+            <label htmlFor="garden-name-input" className={label}>
+              garden name:
             </label>
             <input
               id="garden-name-input"
               type="text"
-              required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g., Sunny Pollinator Border"
-              className="w-full px-3 py-2 text-sm bg-[#F9FAF8] border border-[#D4DDD7] rounded-lg focus:outline-none focus:border-[#1B4332]"
+              placeholder="ex: first draft of the yard"
+              className={field}
+              autoFocus
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <label htmlFor="garden-x-input" className="block text-xs font-semibold text-[#14261C]">
-                Width X (4–20 ft)
-              </label>
-              <input
-                id="garden-x-input"
-                type="number"
-                min={4}
-                max={20}
-                required
-                value={width}
-                onChange={(e) => setWidth(Number(e.target.value))}
-                className="w-full px-3 py-2 text-sm font-mono tabular-nums bg-[#F9FAF8] border border-[#D4DDD7] rounded-lg focus:outline-none focus:border-[#1B4332]"
-              />
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 items-end">
+            <div className="sm:col-span-2">
+              <span className={label}>dimensions:</span>
+              <div className="flex items-center gap-3">
+                <input
+                  aria-label="Width in feet, 4 to 20"
+                  type="number"
+                  inputMode="numeric"
+                  min={4}
+                  max={20}
+                  required
+                  value={width}
+                  onChange={(e) => setWidth(e.target.value)}
+                  placeholder="width x (ft)"
+                  className={field}
+                />
+                <span className="text-[26px] text-[#30573C]" aria-hidden="true">×</span>
+                <input
+                  aria-label="Length in feet, 4 to 16"
+                  type="number"
+                  inputMode="numeric"
+                  min={4}
+                  max={16}
+                  required
+                  value={height}
+                  onChange={(e) => setHeight(e.target.value)}
+                  placeholder="length y (ft)"
+                  className={field}
+                />
+              </div>
             </div>
-
-            <div className="space-y-1.5">
-              <label htmlFor="garden-y-input" className="block text-xs font-semibold text-[#14261C]">
-                Length Y (4–16 ft)
+            <div>
+              <label htmlFor="garden-zip-input" className={label}>
+                zip code:
               </label>
               <input
-                id="garden-y-input"
-                type="number"
-                min={4}
-                max={16}
+                id="garden-zip-input"
+                inputMode="numeric"
+                maxLength={5}
                 required
-                value={height}
-                onChange={(e) => setHeight(Number(e.target.value))}
-                className="w-full px-3 py-2 text-sm font-mono tabular-nums bg-[#F9FAF8] border border-[#D4DDD7] rounded-lg focus:outline-none focus:border-[#1B4332]"
+                value={zip}
+                onChange={(e) => setZip(e.target.value.replace(/\D/g, ''))}
+                placeholder="ex: 02481"
+                className={`${field} font-mono tracking-widest`}
               />
             </div>
           </div>
 
-          <div className="space-y-1.5">
-            <label htmlFor="garden-zone-select" className="block text-xs font-semibold text-[#14261C]">
-              Massachusetts Hardiness Region
-            </label>
-            <select
-              id="garden-zone-select"
-              value={zone}
-              onChange={(e) => setZone(e.target.value as MAZone)}
-              className="w-full px-3 py-2 text-sm bg-[#F9FAF8] border border-[#D4DDD7] rounded-lg focus:outline-none focus:border-[#1B4332]"
+          <p className="text-[16px] text-[#3F5747]">
+            each square on your grid is 1 ft × 1 ft. width up to 20 ft, length up to 16 ft. your
+            ZIP code gives you local weather alerts later.
+          </p>
+          {err && (
+            <p role="alert" className="text-[16px] font-medium text-[#B4233C]">
+              {err}
+            </p>
+          )}
+
+          <div className="flex justify-center pt-1">
+            <button
+              type="submit"
+              disabled={busy}
+              className="h-16 px-12 text-[24px] font-bold text-white bg-[#30573C] hover:bg-[#3E6E4D] rounded-full transition-colors cursor-pointer disabled:opacity-60"
             >
-              <option value="5b">Zone 5b — Berkshires &amp; Northern Hilltowns</option>
-              <option value="6a">Zone 6a — Central MA &amp; Pioneer Valley</option>
-              <option value="6b">Zone 6b — Greater Boston, MetroWest &amp; North Shore</option>
-              <option value="7a">Zone 7a — Cape Cod, South Coast &amp; Islands</option>
-            </select>
+              {busy ? 'finding your area…' : 'build garden'}
+            </button>
           </div>
-
-          <div className="flex items-center justify-between text-xs text-[#4A5D52] bg-[#F5F8F5] px-3 py-2 rounded-lg font-mono tabular-nums">
-            <span>Total Bed Footprint</span>
-            <span className="font-semibold text-[#14261C]">{width * height} sq ft</span>
-          </div>
-
-          <button
-            type="submit"
-            className="w-full py-2.5 px-4 text-sm font-semibold text-white bg-[#1B4332] hover:bg-[#2D6A4F] rounded-lg transition-colors cursor-pointer"
-          >
-            Build Garden Grid
-          </button>
         </form>
       </div>
     </div>

@@ -78,22 +78,22 @@ export function PlantGuideView() {
   }, [debouncedQuery, category, light, moisture, offset, reloadNonce]);
 
   return (
-    <div className="max-w-[1360px] mx-auto px-4 sm:px-6 py-10 space-y-8">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#E3E8E4] pb-6">
+    <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#E6E2CC] pb-6">
         <div className="space-y-1">
-          <div className="text-xs font-medium text-[#4A5D52]">
+          <div className="text-xs font-medium text-[#4E6656]">
             Massachusetts Native Flora · FloraAPI /v1/search + /v1/species/&#123;id&#125;
           </div>
-          <h1 className="font-display text-3xl sm:text-4xl font-semibold text-[#14261C]">
+          <h1 className="font-display text-3xl sm:text-4xl font-medium text-[#30573C]">
             Native Plant Guide
           </h1>
-          <p className="text-sm text-[#4A5D52] max-w-[65ch]">
+          <p className="text-sm text-[#4E6656] max-w-[65ch]">
             Live Massachusetts native species with scientific names, common names, family, genus,
             light requirements, soil moisture, water use, hardiness zones, and representative
             photos.
           </p>
         </div>
-        <div className="font-mono text-xs text-[#4A5D52] tabular-nums">
+        <div className="font-mono text-xs text-[#4E6656] tabular-nums">
           {loading
             ? 'Loading Massachusetts natives & growing conditions...'
             : `Showing ${plants.length} of ${totalCount.toLocaleString()} native MA species`}
@@ -101,21 +101,21 @@ export function PlantGuideView() {
       </div>
 
       {/* Filter Toolbar */}
-      <div className="bg-white border border-[#E3E8E4] rounded-xl p-4 space-y-4">
+      <div className="bg-white border border-[#E6E2CC] rounded-3xl p-4 space-y-4">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
           <div className="lg:col-span-4 relative">
-            <Search className="w-4 h-4 text-[#6B7D72] absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-[#6A7E6C] absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search common name, scientific name, family, genus..."
-              className="w-full pl-9 pr-3 py-2 text-sm bg-[#F9FAF8] border border-[#D4DDD7] rounded-lg focus:outline-none focus:border-[#1B4332]"
+              className="w-full pl-9 pr-3 py-2 text-sm bg-[#FFFDF3] border border-[#D8D4B8] rounded-lg focus:outline-none focus:border-[#30573C]"
             />
           </div>
 
           <div className="lg:col-span-8 flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-1 p-1 bg-[#F2F5F2] rounded-lg overflow-x-auto">
+            <div className="flex items-center gap-1 p-1 bg-[#F8F5E6] rounded-lg overflow-x-auto">
               {(Object.keys(CATEGORY_LABELS) as ('all' | PlantCategory)[]).map((cat) => (
                 <button
                   key={cat}
@@ -126,8 +126,8 @@ export function PlantGuideView() {
                   }}
                   className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                     category === cat
-                      ? 'bg-white text-[#14261C] shadow-xs'
-                      : 'text-[#4A5D52] hover:text-[#14261C]'
+                      ? 'bg-white text-[#22392A] shadow-xs'
+                      : 'text-[#4E6656] hover:text-[#22392A]'
                   }`}
                 >
                   {CATEGORY_LABELS[cat]}
@@ -135,7 +135,7 @@ export function PlantGuideView() {
               ))}
             </div>
 
-            <div className="flex items-center gap-1 p-1 bg-[#F2F5F2] rounded-lg">
+            <div className="flex items-center gap-1 p-1 bg-[#F8F5E6] rounded-lg">
               <button
                 type="button"
                 onClick={() => {
@@ -144,8 +144,8 @@ export function PlantGuideView() {
                 }}
                 className={`px-2.5 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                   light === 'all'
-                    ? 'bg-white text-[#14261C] shadow-xs'
-                    : 'text-[#4A5D52] hover:text-[#14261C]'
+                    ? 'bg-white text-[#22392A] shadow-xs'
+                    : 'text-[#4E6656] hover:text-[#22392A]'
                 }`}
               >
                 Any Light
@@ -160,8 +160,8 @@ export function PlantGuideView() {
                   }}
                   className={`px-2.5 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                     light === opt
-                      ? 'bg-white text-[#14261C] shadow-xs'
-                      : 'text-[#4A5D52] hover:text-[#14261C]'
+                      ? 'bg-white text-[#22392A] shadow-xs'
+                      : 'text-[#4E6656] hover:text-[#22392A]'
                   }`}
                 >
                   {opt}
@@ -169,7 +169,7 @@ export function PlantGuideView() {
               ))}
             </div>
 
-            <div className="flex items-center gap-1 p-1 bg-[#F2F5F2] rounded-lg">
+            <div className="flex items-center gap-1 p-1 bg-[#F8F5E6] rounded-lg">
               <button
                 type="button"
                 onClick={() => {
@@ -178,8 +178,8 @@ export function PlantGuideView() {
                 }}
                 className={`px-2.5 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                   moisture === 'all'
-                    ? 'bg-white text-[#14261C] shadow-xs'
-                    : 'text-[#4A5D52] hover:text-[#14261C]'
+                    ? 'bg-white text-[#22392A] shadow-xs'
+                    : 'text-[#4E6656] hover:text-[#22392A]'
                 }`}
               >
                 Any Moisture
@@ -194,8 +194,8 @@ export function PlantGuideView() {
                   }}
                   className={`px-2.5 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                     moisture === opt
-                      ? 'bg-white text-[#14261C] shadow-xs'
-                      : 'text-[#4A5D52] hover:text-[#14261C]'
+                      ? 'bg-white text-[#22392A] shadow-xs'
+                      : 'text-[#4E6656] hover:text-[#22392A]'
                   }`}
                 >
                   {opt}
@@ -208,20 +208,20 @@ export function PlantGuideView() {
 
       {/* Error / Configuration State */}
       {error && (
-        <div className="bg-white border border-[#FECACA] rounded-xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="bg-white border border-[#FECACA] rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-[#DC2626] shrink-0 mt-0.5" />
             <div className="space-y-1">
               <h2 className="font-semibold text-sm text-[#991B1B]">
                 {configured ? 'FloraAPI Request Issue' : 'FLORA_API_KEY Setup Needed'}
               </h2>
-              <p className="text-xs text-[#4A5D52] leading-relaxed">{error}</p>
+              <p className="text-xs text-[#4E6656] leading-relaxed">{error}</p>
             </div>
           </div>
           <button
             type="button"
             onClick={() => setReloadNonce((n) => n + 1)}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-[#1B4332] bg-[#F2F7F4] hover:bg-[#E4EFE8] border border-[#CFE0D5] rounded-lg whitespace-nowrap shrink-0 cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-[#30573C] bg-[#F7F5E5] hover:bg-[#E4EFE8] border border-[#CFE0D5] rounded-lg whitespace-nowrap shrink-0 cursor-pointer"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             <span>Retry Connection</span>
@@ -235,7 +235,7 @@ export function PlantGuideView() {
           {Array.from({ length: 9 }).map((_, idx) => (
             <div
               key={idx}
-              className="bg-white border border-[#E3E8E4] rounded-xl p-5 space-y-4 animate-pulse"
+              className="bg-white border border-[#E6E2CC] rounded-3xl p-5 space-y-4 animate-pulse"
             >
               <div className="h-40 rounded-lg bg-[#E9EFEA]" />
               <div className="space-y-2">
@@ -247,11 +247,11 @@ export function PlantGuideView() {
           ))}
         </div>
       ) : plants.length === 0 && !error ? (
-        <div className="bg-white border border-[#E3E8E4] rounded-xl p-12 text-center space-y-3">
-          <h2 className="font-display text-xl font-semibold text-[#14261C]">
+        <div className="bg-white border border-[#E6E2CC] rounded-3xl p-12 text-center space-y-3">
+          <h2 className="font-display text-xl font-semibold text-[#22392A]">
             No matching Massachusetts native species found
           </h2>
-          <p className="text-sm text-[#4A5D52]">
+          <p className="text-sm text-[#4E6656]">
             Try broadening your search or clearing the light, soil moisture, or habit filter.
           </p>
           <button
@@ -263,7 +263,7 @@ export function PlantGuideView() {
               setMoisture('all');
               setOffset(0);
             }}
-            className="px-4 py-2 text-sm font-semibold text-white bg-[#1B4332] hover:bg-[#2D6A4F] rounded-lg cursor-pointer"
+            className="px-4 py-2 text-sm font-semibold text-white bg-[#30573C] hover:bg-[#3E6E4D] rounded-lg cursor-pointer"
           >
             Reset Filters
           </button>
@@ -274,10 +274,10 @@ export function PlantGuideView() {
             {plants.map((plant) => (
               <article
                 key={plant.id}
-                className="bg-white border border-[#E3E8E4] rounded-xl overflow-hidden flex flex-col justify-between"
+                className="bg-white border border-[#E6E2CC] rounded-3xl overflow-hidden flex flex-col justify-between"
               >
                 <div>
-                  <div className="aspect-[16/10] w-full bg-[#F3F7F4] border-b border-[#EEF2EF] overflow-hidden relative flex items-center justify-center">
+                  <div className="aspect-[16/10] w-full bg-[#F3F7F4] border-b border-[#F6F2DF] overflow-hidden relative flex items-center justify-center">
                     {plant.photoUrl ? (
                       <img
                         src={plant.photoUrl}
@@ -299,42 +299,42 @@ export function PlantGuideView() {
 
                   <div className="p-5 space-y-3">
                     <div className="space-y-0.5">
-                      <div className="text-xs text-[#2D6A4F] font-medium">
+                      <div className="text-xs text-[#3E6E4D] font-medium">
                         Native (MA) · <span className="font-mono">{plant.hardinessRange}</span>
                       </div>
-                      <h2 className="font-display text-lg font-semibold text-[#14261C] leading-snug">
+                      <h2 className="font-display text-lg font-semibold text-[#22392A] leading-snug">
                         {plant.name}
                       </h2>
-                      <div className="text-xs italic text-[#5B6E62]">{plant.sci}</div>
+                      <div className="text-xs italic text-[#5A705F]">{plant.sci}</div>
                     </div>
 
                     {/* Description including Water Use */}
-                    <p className="text-xs text-[#35473C] leading-relaxed">{plant.description}</p>
+                    <p className="text-xs text-[#34503D] leading-relaxed">{plant.description}</p>
 
                     {/* Taxonomy & Growing Conditions */}
-                    <div className="text-xs text-[#4A5D52] space-y-1.5 pt-2 border-t border-[#EEF2EF]">
+                    <div className="text-xs text-[#4E6656] space-y-1.5 pt-2 border-t border-[#F6F2DF]">
                       <div className="flex items-center justify-between gap-2">
                         <span>
-                          <strong className="text-[#14261C]">Family:</strong> {plant.family}
+                          <strong className="text-[#22392A]">Family:</strong> {plant.family}
                         </span>
                         <span>
-                          <strong className="text-[#14261C]">Genus:</strong>{' '}
+                          <strong className="text-[#22392A]">Genus:</strong>{' '}
                           <span className="italic">{plant.genus}</span>
                         </span>
                       </div>
                       <div>
-                        <strong className="text-[#14261C]">Light:</strong>{' '}
+                        <strong className="text-[#22392A]">Light:</strong>{' '}
                         {plant.lightRequirements.length > 0
                           ? plant.lightRequirements.join(', ')
                           : 'Not listed'}{' '}
-                        · <strong className="text-[#14261C]">Soil Moisture:</strong>{' '}
+                        · <strong className="text-[#22392A]">Soil Moisture:</strong>{' '}
                         {plant.soilMoisture.length > 0
                           ? plant.soilMoisture.join(', ')
                           : 'Not listed'}
                       </div>
                       {plant.commonNames.length > 1 && (
                         <div>
-                          <strong className="text-[#14261C]">Also known as:</strong>{' '}
+                          <strong className="text-[#22392A]">Also known as:</strong>{' '}
                           {plant.commonNames.slice(1, 5).join(', ')}
                         </div>
                       )}
@@ -350,18 +350,18 @@ export function PlantGuideView() {
           </div>
 
           {(offset > 0 || hasMore) && (
-            <div className="flex items-center justify-between pt-4 border-t border-[#E3E8E4]">
+            <div className="flex items-center justify-between pt-4 border-t border-[#E6E2CC]">
               <button
                 type="button"
                 disabled={offset === 0}
                 onClick={() => setOffset((o) => Math.max(0, o - PAGE_SIZE))}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-[#14261C] bg-white border border-[#D4DDD7] rounded-lg hover:bg-[#F2F5F2] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-[#22392A] bg-white border border-[#D8D4B8] rounded-lg hover:bg-[#F8F5E6] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
               >
                 <ChevronLeft className="w-4 h-4" />
                 <span>Previous</span>
               </button>
 
-              <span className="font-mono text-xs text-[#4A5D52] tabular-nums">
+              <span className="font-mono text-xs text-[#4E6656] tabular-nums">
                 Showing {offset + 1}–{Math.min(totalCount, offset + plants.length)} of{' '}
                 {totalCount.toLocaleString()}
               </span>
@@ -370,7 +370,7 @@ export function PlantGuideView() {
                 type="button"
                 disabled={!hasMore}
                 onClick={() => setOffset((o) => o + PAGE_SIZE)}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-[#14261C] bg-white border border-[#D4DDD7] rounded-lg hover:bg-[#F2F5F2] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-[#22392A] bg-white border border-[#D8D4B8] rounded-lg hover:bg-[#F8F5E6] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
               >
                 <span>Next</span>
                 <ChevronRight className="w-4 h-4" />

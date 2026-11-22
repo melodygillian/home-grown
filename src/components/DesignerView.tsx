@@ -1,3 +1,4 @@
+import { useFitCell } from '../utils/useFitCell';
 import { useEffect, useMemo, useRef, useState, type DragEvent } from 'react';
 import {
   AlertCircle,
@@ -6,6 +7,7 @@ import {
   ArrowRight,
   Check,
   ChevronDown,
+  CloudRain,
   CloudSun,
   Droplet,
   Droplets,
@@ -46,7 +48,6 @@ interface DesignerViewProps {
   onBackToDashboard: () => void;
 }
 
-const CELL_PX = 48;
 
 const CATEGORY_TABS: { key: 'all' | PlantCategory; label: string }[] = [
   { key: 'all', label: 'All' },
@@ -118,6 +119,49 @@ function MoistureIcon({ value, className }: { value: string; className?: string 
   return <Droplet className={className} />;
 }
 
+
+const LIGHT_LABEL: Record<string, string> = {
+  Sun: 'sun (6+ hrs)',
+  'Part Shade': 'part shade (3–6 hrs)',
+  Shade: 'shade (under 3 hrs)',
+};
+const MOISTURE_LABEL: Record<string, string> = {
+  Dry: 'dry (sandy)',
+  Moist: 'moist (loam)',
+  Wet: 'wet (damp)',
+};
+
+/** "1 · 2 · 3" step indicator at the top of the side panel. */
+function StepDots({ step, onStep }: { step: DesignStep; onStep: (s: DesignStep) => void }) {
+  const steps: [DesignStep, string][] = [
+    ['sun', 'light'],
+    ['moisture', 'moisture'],
+    ['plants', 'plants'],
+  ];
+  return (
+    <ol className="flex items-center gap-1.5 text-[14px]" aria-label="Planning steps">
+      {steps.map(([id, label], i) => {
+        const active = step === id;
+        return (
+          <li key={id} className="flex items-center gap-1.5">
+            {i > 0 && <span className="w-4 h-[2px] bg-[#30573C]/30" aria-hidden="true" />}
+            <button
+              type="button"
+              onClick={() => onStep(id)}
+              aria-current={active ? 'step' : undefined}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full cursor-pointer ${
+                active ? 'bg-[#30573C] text-white' : 'text-[#30573C] hover:bg-[#F3F1DC]'
+              }`}
+            >
+              <span className="font-bold">{i + 1}</span> {label}
+            </button>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
 export function DesignerView({
   project,
   onUpdateProject,
@@ -161,6 +205,8 @@ export function DesignerView({
   const [confirmProceedWithConflicts, setConfirmProceedWithConflicts] = useState(false);
 
   const gridRef = useRef<HTMLDivElement | null>(null);
+  const frameRef = useRef<HTMLDivElement | null>(null);
+  const CELL_PX = useFitCell(frameRef, project.width, project.height, { min: 24, max: 56, bottomGap: 80 });
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -438,15 +484,15 @@ export function DesignerView({
     : null;
 
   return (
-    <div className="max-w-[1400px] mx-auto px-4 sm:px-6 py-6 space-y-5">
+    <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-3">
       {/* Workspace Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[#E3E8E4] pb-4">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[#E6E2CC] pb-2">
         <div className="space-y-0.5">
-          <div className="flex items-center gap-2 text-xs text-[#4A5D52]">
+          <div className="flex items-center gap-2 text-xs text-[#4E6656]">
             <button
               type="button"
               onClick={onBackToDashboard}
-              className="inline-flex items-center gap-1 hover:text-[#14261C] cursor-pointer"
+              className="inline-flex items-center gap-1 hover:text-[#22392A] cursor-pointer"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>All Gardens</span>
@@ -460,14 +506,14 @@ export function DesignerView({
             <span aria-hidden="true">·</span>
             <span className="font-mono tabular-nums">{project.placements.length} placed</span>
           </div>
-          <h1 className="font-display text-2xl sm:text-3xl font-semibold text-[#14261C]">
+          <h1 className="text-[clamp(28px,3vw,42px)] leading-tight font-medium text-[#30573C]">
             {project.name}
           </h1>
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
-          <div className="hidden sm:flex items-center gap-3 px-3 py-1.5 bg-white border border-[#E3E8E4] rounded-lg text-xs text-[#4A5D52]">
-            <span className="font-medium text-[#14261C]">Nectar:</span>
+          <div className="hidden sm:flex items-center gap-3 px-3 py-1.5 bg-white border border-[#E6E2CC] rounded-lg text-xs text-[#4E6656]">
+            <span className="font-medium text-[#22392A]">Nectar:</span>
             <span
               className={seasonCoverage.spring ? 'text-[#15803D] font-semibold' : 'text-[#8B9C91]'}
             >
@@ -490,7 +536,7 @@ export function DesignerView({
           <button
             type="button"
             onClick={handleTryComplete}
-            className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-[#1B4332] hover:bg-[#2D6A4F] rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-[#30573C] hover:bg-[#3E6E4D] rounded-full transition-colors whitespace-nowrap shrink-0 cursor-pointer"
           >
             <span>Complete &amp; Track Maintenance</span>
             <ArrowRight className="w-4 h-4" />
@@ -527,14 +573,14 @@ export function DesignerView({
             <button
               type="button"
               onClick={onCompleteGarden}
-              className="px-3 py-1.5 text-xs font-semibold text-white bg-[#DC2626] hover:bg-[#B91C1C] rounded-md cursor-pointer"
+              className="px-3 py-1.5 text-xs font-semibold text-white bg-[#DC2626] hover:bg-[#B91C1C] rounded-full cursor-pointer"
             >
               Continue Anyway
             </button>
             <button
               type="button"
               onClick={() => setConfirmProceedWithConflicts(false)}
-              className="px-3 py-1.5 text-xs font-semibold text-[#14261C] bg-white border border-[#D4DDD7] rounded-md cursor-pointer"
+              className="px-3 py-1.5 text-xs font-semibold text-[#22392A] bg-white border border-[#D8D4B8] rounded-md cursor-pointer"
             >
               Keep Editing
             </button>
@@ -542,48 +588,24 @@ export function DesignerView({
         </div>
       )}
 
-      {/* 3-Step Workflow Switcher */}
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-white border border-[#E3E8E4] rounded-xl p-2">
-        <div className="flex flex-wrap items-center gap-1">
-          {[
-            { id: 'sun' as DesignStep, num: '01', label: 'Light Requirements' },
-            { id: 'moisture' as DesignStep, num: '02', label: 'Soil Moisture' },
-            { id: 'plants' as DesignStep, num: '03', label: 'Click Grid & Place Native Plants' },
-          ].map((item) => {
-            const active = step === item.id;
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => switchStep(item.id)}
-                className={`px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer flex items-center gap-2 ${
-                  active
-                    ? 'bg-[#1B4332] text-white'
-                    : 'text-[#4A5D52] hover:bg-[#F2F5F2] hover:text-[#14261C]'
-                }`}
-              >
-                <span
-                  className={`font-mono text-xs ${active ? 'text-[#A7F3D0]' : 'text-[#6B7D72]'}`}
-                >
-                  {item.num}
-                </span>
-                <span>{item.label}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Layer Visibility Controls */}
-        <div className="flex items-center gap-1.5 px-2">
-          <Eye className="w-3.5 h-3.5 text-[#5B6E62] mr-0.5" />
-          <span className="text-xs font-medium text-[#5B6E62] mr-1">Layers:</span>
+      {/* Main Split Workspace */}
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] gap-5 items-start">
+        {/* Left: Backyard Grid Canvas */}
+        <div className="space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            {step !== 'plants' && (
+              <>
+        {/* Layer visibility */}
+        <div className="flex items-center gap-1.5">
+          <Eye className="w-3.5 h-3.5 text-[#5A705F] mr-0.5" />
+          <span className="text-xs font-medium text-[#5A705F] mr-1">Layers:</span>
           <button
             type="button"
             onClick={() => setShowSun((v) => !v)}
             className={`px-2.5 py-1 text-xs font-medium rounded-md border transition-colors whitespace-nowrap cursor-pointer ${
               showSun
                 ? 'bg-[#FEF9C3] border-[#EAB308] text-[#713F12]'
-                : 'bg-[#F9FAF8] border-[#E3E8E4] text-[#6B7D72]'
+                : 'bg-[#FFFDF3] border-[#E6E2CC] text-[#6A7E6C]'
             }`}
           >
             Light
@@ -594,7 +616,7 @@ export function DesignerView({
             className={`px-2.5 py-1 text-xs font-medium rounded-md border transition-colors whitespace-nowrap cursor-pointer ${
               showMoisture
                 ? 'bg-[#E0F2FE] border-[#0284C7] text-[#0C4A6E]'
-                : 'bg-[#F9FAF8] border-[#E3E8E4] text-[#6B7D72]'
+                : 'bg-[#FFFDF3] border-[#E6E2CC] text-[#6A7E6C]'
             }`}
           >
             Soil Moisture
@@ -605,110 +627,32 @@ export function DesignerView({
             className={`px-2.5 py-1 text-xs font-medium rounded-md border transition-colors whitespace-nowrap cursor-pointer ${
               showCanopies
                 ? 'bg-[#DCFCE7] border-[#16A34A] text-[#14532D]'
-                : 'bg-[#F9FAF8] border-[#E3E8E4] text-[#6B7D72]'
+                : 'bg-[#FFFDF3] border-[#E6E2CC] text-[#6A7E6C]'
             }`}
           >
             Plants
           </button>
         </div>
-      </div>
-
-      {/* Main Split Workspace */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
-        {/* Left: Backyard Grid Canvas */}
-        <div className="xl:col-span-8 bg-white border border-[#E3E8E4] rounded-xl p-4 sm:p-5 space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#EEF2EF]">
-            {step === 'sun' && (
-              <>
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-xs font-semibold text-[#14261C] mr-1">
-                    Light Requirement:
-                  </span>
-                  {lightCategories.map((cat) => (
-                    <button
-                      key={cat}
-                      type="button"
-                      onClick={() => setPaintSun(cat)}
-                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors whitespace-nowrap cursor-pointer ${
-                        paintSun === cat
-                          ? 'bg-[#1B4332] text-white border-[#1B4332]'
-                          : 'bg-[#F9FAF8] text-[#14261C] border-[#D4DDD7] hover:bg-[#EEF4F0]'
-                      }`}
-                    >
-                      <LightIcon value={cat} className="w-3.5 h-3.5" />
-                      <span>{cat}</span>
-                    </button>
-                  ))}
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={fillAllCells}
-                    className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-[#4A5D52] hover:text-[#14261C] bg-[#F2F5F2] rounded-lg cursor-pointer whitespace-nowrap"
-                  >
-                    <PaintBucket className="w-3.5 h-3.5" />
-                    <span>Fill All</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => switchStep('moisture')}
-                    className="px-3 py-1.5 text-xs font-semibold text-white bg-[#2D6A4F] hover:bg-[#1B4332] rounded-lg cursor-pointer whitespace-nowrap"
-                  >
-                    Next: Soil Moisture →
-                  </button>
-                </div>
-              </>
-            )}
-
-            {step === 'moisture' && (
-              <>
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-xs font-semibold text-[#14261C] mr-1">Soil Moisture:</span>
-                  {moistureCategories.map((cat) => (
-                    <button
-                      key={cat}
-                      type="button"
-                      onClick={() => setPaintMoisture(cat)}
-                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors whitespace-nowrap cursor-pointer ${
-                        paintMoisture === cat
-                          ? 'bg-[#1B4332] text-white border-[#1B4332]'
-                          : 'bg-[#F9FAF8] text-[#14261C] border-[#D4DDD7] hover:bg-[#EEF4F0]'
-                      }`}
-                    >
-                      <MoistureIcon value={cat} className="w-3.5 h-3.5" />
-                      <span>{cat}</span>
-                    </button>
-                  ))}
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={fillAllCells}
-                    className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-[#4A5D52] hover:text-[#14261C] bg-[#F2F5F2] rounded-lg cursor-pointer whitespace-nowrap"
-                  >
-                    <PaintBucket className="w-3.5 h-3.5" />
-                    <span>Fill All</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => switchStep('plants')}
-                    className="px-3 py-1.5 text-xs font-semibold text-white bg-[#2D6A4F] hover:bg-[#1B4332] rounded-lg cursor-pointer whitespace-nowrap"
-                  >
-                    Next: Place Plants →
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={fillAllCells}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-sm font-medium text-[#30573C] border-2 border-[#30573C] hover:bg-[#F3F1DC] rounded-full cursor-pointer whitespace-nowrap"
+                >
+                  <PaintBucket className="w-4 h-4" />
+                  <span>fill whole garden</span>
+                </button>
               </>
             )}
 
             {step === 'plants' && (
               <div className="flex flex-wrap items-center justify-between gap-2 w-full">
-                <div className="text-xs text-[#35473C]">
-                  <span className="font-semibold text-[#14261C]">Placement Mode:</span> Click any
+                <div className="text-xs text-[#34503D]">
+                  <span className="font-semibold text-[#22392A]">Placement Mode:</span> Click any
                   square to match FloraAPI light &amp; soil moisture conditions, select from the
                   photo dropdown, or drag onto the grid.
                 </div>
                 {clickPlacePlant && (
-                  <div className="flex items-center gap-2 text-xs font-semibold text-[#1B4332] bg-[#E7F4EC] px-2.5 py-1 rounded-md">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-[#30573C] bg-[#E7F4EC] px-2.5 py-1 rounded-md">
                     <span>Click any square to place {clickPlacePlant.name}</span>
                     <button
                       type="button"
@@ -744,15 +688,15 @@ export function DesignerView({
             </div>
           )}
 
-          {/* Wooden-Framed Backyard Canvas */}
-          <div className="rounded-xl bg-[#4E6E3A] p-4 border-[6px] border-[#6E513B] shadow-inner overflow-x-auto">
+          {/* Garden grid canvas (Figma: sage squares in a green-outlined frame) */}
+          <div ref={frameRef} className="rounded-3xl bg-[#FFFDF3] p-4 border-[3px] border-[#30573C] overflow-x-auto">
             <div className="inline-block mx-auto">
               <div className="flex items-center pl-7 mb-1.5">
                 {Array.from({ length: project.width }, (_, c) => (
                   <div
                     key={c}
                     style={{ width: CELL_PX }}
-                    className="text-center font-mono text-[10px] text-white/80 tabular-nums select-none"
+                    className="text-center font-mono text-[10px] text-[#30573C] tabular-nums select-none"
                   >
                     {c + 1}ft
                   </div>
@@ -765,7 +709,7 @@ export function DesignerView({
                     <div
                       key={r}
                       style={{ height: CELL_PX }}
-                      className="w-5 flex items-center justify-end font-mono text-[10px] text-white/80 tabular-nums select-none"
+                      className="w-5 flex items-center justify-end font-mono text-[10px] text-[#30573C] tabular-nums select-none"
                     >
                       {r + 1}
                     </div>
@@ -864,7 +808,7 @@ export function DesignerView({
                               ? 'z-20 bg-[#DC2626]/42 border-[3px] border-[#DC2626] shadow-[0_0_14px_rgba(220,38,38,0.65)]'
                               : mismatch
                                 ? 'z-15 bg-[#FEF3C7]/60 border-2 border-dashed border-[#D97706]'
-                                : 'z-15 bg-[#D8F3DC]/55 border-2 border-dashed border-white/90 hover:bg-[#D8F3DC]/78'
+                                : 'z-15 bg-[#F9D3E2]/55 border-2 border-dashed border-white/90 hover:bg-[#F9D3E2]/78'
                           }`}
                           title={`${plant.name} (${plant.sci}) · ${plant.hardinessRange} · ${plant.spreadFt} ft spread`}
                         >
@@ -882,12 +826,12 @@ export function DesignerView({
                               removePlant(placement.uid);
                             }}
                             aria-label={`Remove ${plant.name}`}
-                            className="opacity-0 group-hover:opacity-100 focus:opacity-100 absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-[#14261C] hover:bg-[#DC2626] text-white flex items-center justify-center shadow transition-opacity cursor-pointer"
+                            className="opacity-0 group-hover:opacity-100 focus:opacity-100 absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-[#22392A] hover:bg-[#DC2626] text-white flex items-center justify-center shadow transition-opacity cursor-pointer"
                           >
                             <X className="w-3 h-3" />
                           </button>
 
-                          <div className="opacity-0 group-hover:opacity-100 pointer-events-none absolute -bottom-7 left-1/2 -translate-x-1/2 bg-[#14261C] text-white text-[10px] font-medium px-2 py-0.5 rounded whitespace-nowrap shadow z-30">
+                          <div className="opacity-0 group-hover:opacity-100 pointer-events-none absolute -bottom-7 left-1/2 -translate-x-1/2 bg-[#22392A] text-white text-[10px] font-medium px-2 py-0.5 rounded whitespace-nowrap shadow z-30">
                             {plant.name} · <span className="italic">{plant.sci}</span> ·{' '}
                             {plant.spreadFt}ft
                             {isConflict ? ' · Conflict' : mismatch ? ' · Check light/moisture' : ''}
@@ -901,7 +845,7 @@ export function DesignerView({
           </div>
 
           {/* Dynamic Legend using FloraAPI categories */}
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-[#4A5D52] pt-1">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-[#4E6656] pt-1">
             {lightCategories.map((cat) => (
               <span key={cat} className="inline-flex items-center gap-1.5">
                 <span
@@ -926,76 +870,87 @@ export function DesignerView({
         </div>
 
         {/* Right: Contextual Step Guide or FloraAPI Massachusetts Plant Selector */}
-        <aside className="xl:col-span-4 bg-white border border-[#E3E8E4] rounded-xl p-5 flex flex-col max-h-[840px]">
-          {step === 'sun' && (
-            <div className="space-y-4">
-              <div className="text-xs font-mono text-[#2D6A4F] font-semibold">STEP 01 OF 03</div>
-              <h2 className="font-display text-xl font-semibold text-[#14261C]">
-                Map Light Requirements
-              </h2>
-              <p className="text-sm text-[#4A5D52] leading-relaxed">
-                Click or click-and-drag across your grid using the exact light requirement
-                categories pulled from FloraAPI species data.
-              </p>
+        <aside className="bg-[#FFFDF3] border-[3px] border-[#30573C] rounded-[32px] p-5 flex flex-col lg:sticky lg:top-[92px] max-h-[calc(100vh-108px)] overflow-hidden">
+          <StepDots step={step} onStep={switchStep} />
 
-              <div className="space-y-3 pt-2 border-t border-[#EEF2EF] text-sm">
+          {step === 'sun' && (
+            <div className="space-y-4 mt-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-[34px] leading-none font-normal text-[#30573C]">map light</h2>
+                <Sun className="w-10 h-10 text-[#F2B705]" aria-hidden="true" />
+              </div>
+              <p className="text-[18px] leading-snug text-[#30573C]">
+                click or drag across your grid where there is:
+              </p>
+              <div className="space-y-3">
                 {lightCategories.map((cat) => (
-                  <div key={cat} className="flex items-start gap-2.5">
-                    <LightIcon
-                      value={cat}
-                      className="w-4 h-4 text-[#1B4332] shrink-0 mt-0.5"
-                    />
-                    <div>
-                      <div className="font-semibold text-[#14261C]">{cat}</div>
-                      <p className="text-xs text-[#4A5D52]">{getLightGuidance(cat)}</p>
-                    </div>
-                  </div>
+                  <button
+                    key={cat}
+                    type="button"
+                    aria-pressed={paintSun === cat}
+                    onClick={() => setPaintSun(cat)}
+                    title={getLightGuidance(cat)}
+                    className={`w-full h-14 px-5 rounded-full border-[2.5px] border-[#30573C] text-[20px] font-medium flex items-center justify-center gap-2 transition-colors cursor-pointer ${
+                      paintSun === cat ? 'bg-[#30573C] text-white' : 'text-[#30573C] hover:bg-[#F3F1DC]'
+                    }`}
+                  >
+                    <LightIcon value={cat} className="w-5 h-5" />
+                    {LIGHT_LABEL[cat] ?? cat.toLowerCase()}
+                  </button>
                 ))}
               </div>
-
               <button
                 type="button"
                 onClick={() => switchStep('moisture')}
-                className="w-full py-2.5 px-4 text-sm font-semibold text-white bg-[#1B4332] hover:bg-[#2D6A4F] rounded-lg transition-colors cursor-pointer mt-2"
+                className="w-full h-14 mt-4 rounded-full bg-[#30573C] hover:bg-[#3E6E4D] text-white text-[20px] font-bold cursor-pointer"
               >
-                Continue to Soil Moisture →
+                next (moisture) →
               </button>
             </div>
           )}
 
           {step === 'moisture' && (
-            <div className="space-y-4">
-              <div className="text-xs font-mono text-[#2D6A4F] font-semibold">STEP 02 OF 03</div>
-              <h2 className="font-display text-xl font-semibold text-[#14261C]">
-                Map Soil Moisture
-              </h2>
-              <p className="text-sm text-[#4A5D52] leading-relaxed">
-                Paint soil drainage across your yard using the exact soil moisture categories pulled
-                from FloraAPI species data.
+            <div className="space-y-4 mt-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-[34px] leading-none font-normal text-[#30573C]">map soil moisture</h2>
+                <CloudRain className="w-10 h-10 text-[#2F8FE0] shrink-0" aria-hidden="true" />
+              </div>
+              <p className="text-[18px] leading-snug text-[#30573C]">
+                click or drag across your grid where the soil is:
               </p>
-
-              <div className="space-y-3 pt-2 border-t border-[#EEF2EF] text-sm">
+              <div className="space-y-3">
                 {moistureCategories.map((cat) => (
-                  <div key={cat} className="flex items-start gap-2.5">
-                    <MoistureIcon
-                      value={cat}
-                      className="w-4 h-4 text-[#0284C7] shrink-0 mt-0.5"
-                    />
-                    <div>
-                      <div className="font-semibold text-[#14261C]">{cat}</div>
-                      <p className="text-xs text-[#4A5D52]">{getMoistureGuidance(cat)}</p>
-                    </div>
-                  </div>
+                  <button
+                    key={cat}
+                    type="button"
+                    aria-pressed={paintMoisture === cat}
+                    onClick={() => setPaintMoisture(cat)}
+                    title={getMoistureGuidance(cat)}
+                    className={`w-full h-14 px-5 rounded-full border-[2.5px] border-[#30573C] text-[20px] font-medium flex items-center justify-center gap-2 transition-colors cursor-pointer ${
+                      paintMoisture === cat ? 'bg-[#30573C] text-white' : 'text-[#30573C] hover:bg-[#F3F1DC]'
+                    }`}
+                  >
+                    <MoistureIcon value={cat} className="w-5 h-5" />
+                    {MOISTURE_LABEL[cat] ?? cat.toLowerCase()}
+                  </button>
                 ))}
               </div>
-
-              <button
-                type="button"
-                onClick={() => switchStep('plants')}
-                className="w-full py-2.5 px-4 text-sm font-semibold text-white bg-[#1B4332] hover:bg-[#2D6A4F] rounded-lg transition-colors cursor-pointer mt-2"
-              >
-                Continue to MA Native Plants →
-              </button>
+              <div className="grid grid-cols-2 gap-3 mt-4">
+                <button
+                  type="button"
+                  onClick={() => switchStep('sun')}
+                  className="h-14 rounded-full border-[2.5px] border-[#30573C] text-[#30573C] text-[18px] font-bold hover:bg-[#F3F1DC] cursor-pointer"
+                >
+                  ← back
+                </button>
+                <button
+                  type="button"
+                  onClick={() => switchStep('plants')}
+                  className="h-14 rounded-full bg-[#30573C] hover:bg-[#3E6E4D] text-white text-[18px] font-bold cursor-pointer"
+                >
+                  next (plants) →
+                </button>
+              </div>
             </div>
           )}
 
@@ -1003,23 +958,21 @@ export function DesignerView({
             <div className="flex flex-col h-full min-h-0 space-y-3">
               {/* Cell Context Header */}
               <div className="space-y-1 shrink-0">
-                <div className="flex items-center justify-between text-xs text-[#4A5D52]">
-                  <span className="font-mono font-semibold text-[#1B4332] tabular-nums">
+                <div className="flex items-center justify-between text-xs text-[#4E6656]">
+                  <span className="font-mono font-semibold text-[#30573C] tabular-nums">
                     Square ({safeCol + 1}, {safeRow + 1})
                   </span>
                   <span>
                     {activeCell.sun} · {activeCell.moisture}
                   </span>
                 </div>
-                <h2 className="font-display text-xl font-semibold text-[#14261C]">
-                  Native MA Plants (FloraAPI)
-                </h2>
-                <div className="flex items-center justify-between text-[11px] text-[#5B6E62]">
-                  <span>state=MA · native_only=true</span>
+                <h2 className="text-[34px] leading-none font-normal text-[#30573C]">native to MA:</h2>
+                <div className="flex items-center justify-between text-[11px] text-[#5A705F]">
+                  <span>{activeCell.sun.toLowerCase()} · {activeCell.moisture.toLowerCase()} square</span>
                   <button
                     type="button"
                     onClick={() => setMatchCellConditions((v) => !v)}
-                    className="font-semibold text-[#1B4332] hover:underline cursor-pointer"
+                    className="font-semibold text-[#30573C] hover:underline cursor-pointer"
                   >
                     {matchCellConditions ? 'Matched to cell (Show all MA)' : 'All MA (Match cell)'}
                   </button>
@@ -1029,17 +982,17 @@ export function DesignerView({
               {/* Live Search + Category Tabs */}
               <div className="space-y-2 shrink-0">
                 <div className="relative">
-                  <Search className="w-3.5 h-3.5 text-[#6B7D72] absolute left-3 top-1/2 -translate-y-1/2" />
+                  <Search className="w-5 h-5 text-[#22392A] absolute left-4 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Search MA native by common, scientific, family..."
-                    className="w-full pl-8 pr-3 py-1.5 text-xs bg-[#F9FAF8] border border-[#D4DDD7] rounded-lg focus:outline-none focus:border-[#1B4332]"
+                    placeholder="search for plants"
+                    className="w-full pl-11 pr-4 h-12 text-[18px] text-[#30573C] placeholder:text-[#73A384]/70 bg-[#FFFDF3] border-[2.5px] border-[#30573C] rounded-full focus:outline-none"
                   />
                 </div>
 
-                <div className="flex items-center gap-1 p-1 bg-[#F2F5F2] rounded-lg overflow-x-auto">
+                <div className="flex items-center gap-1 p-1 bg-[#F8F5E6] rounded-lg overflow-x-auto">
                   {CATEGORY_TABS.map((tab) => (
                     <button
                       key={tab.key}
@@ -1047,8 +1000,8 @@ export function DesignerView({
                       onClick={() => setActiveCategory(tab.key)}
                       className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                         activeCategory === tab.key
-                          ? 'bg-white text-[#14261C] shadow-xs'
-                          : 'text-[#4A5D52] hover:text-[#14261C]'
+                          ? 'bg-white text-[#22392A] shadow-xs'
+                          : 'text-[#4E6656] hover:text-[#22392A]'
                       }`}
                     >
                       {tab.label}
@@ -1072,7 +1025,7 @@ export function DesignerView({
                   <button
                     type="button"
                     onClick={() => setReloadNonce((n) => n + 1)}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold text-[#1B4332] bg-white border border-[#D4DDD7] rounded-md cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold text-[#30573C] bg-white border border-[#D8D4B8] rounded-md cursor-pointer"
                   >
                     <RefreshCw className="w-3 h-3" />
                     <span>Retry</span>
@@ -1082,7 +1035,7 @@ export function DesignerView({
 
               {/* Rich Photo Dropdown Selector */}
               <div ref={dropdownRef} className="relative shrink-0">
-                <label className="block text-[11px] font-semibold text-[#14261C] mb-1">
+                <label className="block text-[11px] font-semibold text-[#22392A] mb-1">
                   Select Massachusetts Native Species ({totalAvailable.toLocaleString()} matching)
                 </label>
                 <button
@@ -1091,29 +1044,29 @@ export function DesignerView({
                   onClick={() => setDropdownOpen((o) => !o)}
                   aria-haspopup="listbox"
                   aria-expanded={dropdownOpen}
-                  className="w-full flex items-center justify-between gap-2.5 p-2 bg-[#F9FAF8] hover:bg-white border border-[#CBD6CE] rounded-lg text-left transition-colors disabled:opacity-60 cursor-pointer"
+                  className="w-full flex items-center justify-between gap-2.5 p-2 bg-[#FFFDF3] hover:bg-white border border-[#CCC8A8] rounded-lg text-left transition-colors disabled:opacity-60 cursor-pointer"
                 >
                   {selectedPlant ? (
                     <div className="flex items-center gap-2.5 min-w-0">
                       <PlantAvatar plant={selectedPlant} size={38} />
                       <div className="min-w-0">
-                        <div className="text-xs font-semibold text-[#14261C] truncate">
+                        <div className="text-xs font-semibold text-[#22392A] truncate">
                           {selectedPlant.name}
                         </div>
-                        <div className="text-[11px] italic text-[#5B6E62] truncate">
+                        <div className="text-[11px] italic text-[#5A705F] truncate">
                           {selectedPlant.sci} · {selectedPlant.hardinessRange}
                         </div>
                       </div>
                     </div>
                   ) : (
-                    <span className="text-xs text-[#5B6E62] py-2 px-1">
+                    <span className="text-xs text-[#5A705F] py-2 px-1">
                       {loadingPlants
                         ? 'Loading native MA plants & growing conditions...'
                         : 'No plants available for this filter'}
                     </span>
                   )}
                   <ChevronDown
-                    className={`w-4 h-4 text-[#4A5D52] shrink-0 transition-transform ${
+                    className={`w-4 h-4 text-[#4E6656] shrink-0 transition-transform ${
                       dropdownOpen ? 'rotate-180' : ''
                     }`}
                   />
@@ -1123,7 +1076,7 @@ export function DesignerView({
                 {dropdownOpen && apiPlants.length > 0 && (
                   <div
                     role="listbox"
-                    className="absolute left-0 right-0 mt-1 z-30 bg-white border border-[#CBD6CE] rounded-xl shadow-lg max-h-72 overflow-y-auto divide-y divide-[#EEF2EF]"
+                    className="absolute left-0 right-0 mt-1 z-30 bg-white border border-[#CCC8A8] rounded-3xl shadow-lg max-h-72 overflow-y-auto divide-y divide-[#F6F2DF]"
                   >
                     {apiPlants.map((plant) => {
                       const isCurrent = selectedPlant?.id === plant.id;
@@ -1144,17 +1097,17 @@ export function DesignerView({
                           <PlantAvatar plant={plant} size={44} />
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center justify-between gap-2">
-                              <span className="text-xs font-semibold text-[#14261C] truncate">
+                              <span className="text-xs font-semibold text-[#22392A] truncate">
                                 {plant.name}
                               </span>
-                              <span className="font-mono text-[10px] text-[#2D6A4F] shrink-0">
+                              <span className="font-mono text-[10px] text-[#3E6E4D] shrink-0">
                                 {plant.hardinessRange}
                               </span>
                             </div>
-                            <div className="text-[11px] italic text-[#5B6E62] truncate">
+                            <div className="text-[11px] italic text-[#5A705F] truncate">
                               {plant.sci}
                             </div>
-                            <div className="text-[10px] text-[#4A5D52] truncate">
+                            <div className="text-[10px] text-[#4E6656] truncate">
                               {plant.family} · {plant.genus} ·{' '}
                               {plant.waterUse.length > 0
                                 ? `Water: ${plant.waterUse.join('/')}`
@@ -1173,16 +1126,16 @@ export function DesignerView({
                 <div
                   draggable
                   onDragStart={(e) => handlePaletteDragStart(e, selectedPlant)}
-                  className="p-3 bg-[#F5F9F6] border border-[#CFE0D5] rounded-xl space-y-2 shrink-0 cursor-grab active:cursor-grabbing"
+                  className="p-3 bg-[#F5F9F6] border border-[#CFE0D5] rounded-3xl space-y-2 shrink-0 cursor-grab active:cursor-grabbing"
                 >
                   <div className="flex items-start gap-3">
                     <PlantAvatar plant={selectedPlant} size={56} />
                     <div className="min-w-0 flex-1 space-y-0.5">
-                      <div className="text-sm font-semibold text-[#14261C] leading-snug">
+                      <div className="text-sm font-semibold text-[#22392A] leading-snug">
                         {selectedPlant.name}
                       </div>
-                      <div className="text-xs italic text-[#4A5D52]">{selectedPlant.sci}</div>
-                      <div className="text-[11px] text-[#35473C]">
+                      <div className="text-xs italic text-[#4E6656]">{selectedPlant.sci}</div>
+                      <div className="text-[11px] text-[#34503D]">
                         <strong>Family:</strong> {selectedPlant.family} · <strong>Genus:</strong>{' '}
                         <span className="italic">{selectedPlant.genus}</span>
                       </div>
@@ -1190,17 +1143,17 @@ export function DesignerView({
                   </div>
 
                   {/* Growing Conditions from GET /v1/species/{id} */}
-                  <div className="text-[11px] text-[#35473C] space-y-1 pt-1.5 border-t border-[#DCE8E0]">
+                  <div className="text-[11px] text-[#34503D] space-y-1 pt-1.5 border-t border-[#DCE8E0]">
                     <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
                       <span>
-                        <strong className="text-[#14261C]">Light:</strong>{' '}
+                        <strong className="text-[#22392A]">Light:</strong>{' '}
                         {selectedPlant.lightRequirements.length > 0
                           ? selectedPlant.lightRequirements.join(', ')
                           : 'Not listed'}
                       </span>
                       <span aria-hidden="true">·</span>
                       <span>
-                        <strong className="text-[#14261C]">Soil Moisture:</strong>{' '}
+                        <strong className="text-[#22392A]">Soil Moisture:</strong>{' '}
                         {selectedPlant.soilMoisture.length > 0
                           ? selectedPlant.soilMoisture.join(', ')
                           : 'Not listed'}
@@ -1208,9 +1161,9 @@ export function DesignerView({
                     </div>
 
                     <div className="flex items-center gap-1.5">
-                      <Thermometer className="w-3.5 h-3.5 text-[#1B4332] shrink-0" />
+                      <Thermometer className="w-3.5 h-3.5 text-[#30573C] shrink-0" />
                       <span>
-                        <strong className="text-[#14261C]">Hardiness:</strong>{' '}
+                        <strong className="text-[#22392A]">Hardiness:</strong>{' '}
                         <span className="font-mono">{selectedPlant.hardinessRange}</span>
                         {selectedZoneSurvives === true && (
                           <span className="text-[#15803D] font-semibold">
@@ -1228,14 +1181,14 @@ export function DesignerView({
                     </div>
 
                     {selectedPlant.commonNames.length > 1 && (
-                      <div className="text-[11px] text-[#4A5D52]">
-                        <strong className="text-[#14261C]">Common names:</strong>{' '}
+                      <div className="text-[11px] text-[#4E6656]">
+                        <strong className="text-[#22392A]">Common names:</strong>{' '}
                         {selectedPlant.commonNames.join(', ')}
                       </div>
                     )}
 
                     {/* Description explicitly containing Water Use */}
-                    <p className="text-[11px] text-[#35473C] leading-relaxed pt-0.5">
+                    <p className="text-[11px] text-[#34503D] leading-relaxed pt-0.5">
                       {selectedPlant.description}
                     </p>
                   </div>
@@ -1244,7 +1197,7 @@ export function DesignerView({
                     <button
                       type="button"
                       onClick={() => placePlant(selectedPlant, safeCol + 0.5, safeRow + 0.5)}
-                      className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-[#1B4332] hover:bg-[#2D6A4F] rounded-lg cursor-pointer"
+                      className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-[#30573C] hover:bg-[#3E6E4D] rounded-lg cursor-pointer"
                     >
                       <Plus className="w-3.5 h-3.5" />
                       <span>
@@ -1260,8 +1213,8 @@ export function DesignerView({
                       }
                       className={`px-2.5 py-1.5 text-xs font-semibold rounded-lg border cursor-pointer ${
                         clickPlacePlant?.id === selectedPlant.id
-                          ? 'bg-[#1B4332] text-white border-[#1B4332]'
-                          : 'bg-white text-[#1B4332] border-[#CBD6CE] hover:bg-[#EEF4F0]'
+                          ? 'bg-[#30573C] text-white border-[#30573C]'
+                          : 'bg-white text-[#30573C] border-[#CCC8A8] hover:bg-[#F3F1DC]'
                       }`}
                     >
                       {clickPlacePlant?.id === selectedPlant.id ? 'Click Grid…' : 'Click-Place'}
@@ -1271,21 +1224,21 @@ export function DesignerView({
               )}
 
               {/* Quick Draggable List Below Dropdown */}
-              <div className="flex-1 overflow-y-auto space-y-2 pr-1 pt-1 border-t border-[#EEF2EF]">
-                <div className="text-[11px] font-medium text-[#5B6E62]">
+              <div className="flex-1 overflow-y-auto space-y-2 pr-1 pt-1 border-t border-[#F6F2DF]">
+                <div className="text-[11px] font-medium text-[#5A705F]">
                   Or drag any Massachusetts native species onto your map:
                 </div>
 
                 {loadingPlants ? (
                   <div className="space-y-2 animate-pulse">
                     {Array.from({ length: 4 }).map((_, i) => (
-                      <div key={i} className="h-16 bg-[#F2F5F2] rounded-lg" />
+                      <div key={i} className="h-16 bg-[#F8F5E6] rounded-lg" />
                     ))}
                   </div>
                 ) : apiPlants.length === 0 && !floraError ? (
-                  <div className="p-5 text-center bg-[#F9FAF8] border border-[#E3E8E4] rounded-lg space-y-2">
-                    <Sprout className="w-5 h-5 text-[#6B7D72] mx-auto" />
-                    <p className="text-xs text-[#4A5D52]">
+                  <div className="p-5 text-center bg-[#FFFDF3] border border-[#E6E2CC] rounded-lg space-y-2">
+                    <Sprout className="w-5 h-5 text-[#6A7E6C] mx-auto" />
+                    <p className="text-xs text-[#4E6656]">
                       No native MA plants matched{' '}
                       <strong>
                         {activeCell.sun} + {activeCell.moisture}
@@ -1299,7 +1252,7 @@ export function DesignerView({
                         setActiveCategory('all');
                         setSearchTerm('');
                       }}
-                      className="text-xs font-semibold text-[#1B4332] underline cursor-pointer"
+                      className="text-xs font-semibold text-[#30573C] underline cursor-pointer"
                     >
                       Show all native MA species
                     </button>
@@ -1318,32 +1271,32 @@ export function DesignerView({
                         }}
                         className={`p-2.5 rounded-lg border transition-colors cursor-grab active:cursor-grabbing flex items-start gap-2.5 ${
                           isSelectedToPlace
-                            ? 'bg-[#EEF6F0] border-[#1B4332] ring-1 ring-[#1B4332]'
-                            : 'bg-[#F9FAF8] border-[#E3E8E4] hover:border-[#52B788] hover:bg-white'
+                            ? 'bg-[#EEF6F0] border-[#30573C] ring-1 ring-[#30573C]'
+                            : 'bg-[#FFFDF3] border-[#E6E2CC] hover:border-[#52B788] hover:bg-white'
                         }`}
                       >
                         <PlantAvatar plant={plant} size={42} />
                         <div className="min-w-0 flex-1 space-y-0.5">
                           <div className="flex items-center justify-between gap-2">
-                            <h3 className="text-xs font-semibold text-[#14261C] truncate">
+                            <h3 className="text-xs font-semibold text-[#22392A] truncate">
                               {plant.name}
                             </h3>
-                            <span className="font-mono text-[10px] font-semibold text-[#2D6A4F] tabular-nums shrink-0">
+                            <span className="font-mono text-[10px] font-semibold text-[#3E6E4D] tabular-nums shrink-0">
                               {plant.hardinessRange}
                             </span>
                           </div>
-                          <div className="text-[11px] italic text-[#5B6E62] truncate">
+                          <div className="text-[11px] italic text-[#5A705F] truncate">
                             {plant.sci}
                           </div>
-                          <div className="text-[10px] text-[#4A5D52] truncate">
+                          <div className="text-[10px] text-[#4E6656] truncate">
                             {plant.family} · <span className="italic">{plant.genus}</span> ·{' '}
                             {plant.spreadFt} ft spread
                           </div>
-                          <p className="text-[10px] text-[#35473C] line-clamp-2 leading-snug">
+                          <p className="text-[10px] text-[#34503D] line-clamp-2 leading-snug">
                             {plant.description}
                           </p>
                           {isSelectedToPlace && (
-                            <div className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#1B4332]">
+                            <div className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#30573C]">
                               <Check className="w-3 h-3" />
                               <span>Click any grid square to place</span>
                             </div>

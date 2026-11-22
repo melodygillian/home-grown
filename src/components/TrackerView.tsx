@@ -1,3 +1,4 @@
+import { useFitCell } from '../utils/useFitCell';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowLeft,
@@ -207,50 +208,41 @@ export function TrackerView({ project, onUpdateProject, onEditMap, onOpenCheckli
   const placeLabel = tracking.place ? `${tracking.place.city}, ${tracking.place.state}` : tracking.zip ? `ZIP ${tracking.zip}` : '';
 
   return (
-    <div className="max-w-[1360px] mx-auto px-4 sm:px-6 py-8 space-y-6 text-[15px]">
+    <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-5 space-y-4 text-[15px]">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#E3E8E4] pb-5">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#E6E2CC] pb-3">
         <div className="space-y-1">
-          <div className="flex items-center gap-2 text-sm text-[#4A5D52]">
-            <button type="button" onClick={onBackToDashboard} className="inline-flex items-center gap-1 hover:text-[#14261C] cursor-pointer">
+          <div className="flex items-center gap-2 text-sm text-[#4E6656]">
+            <button type="button" onClick={onBackToDashboard} className="inline-flex items-center gap-1 hover:text-[#22392A] cursor-pointer">
               <ArrowLeft className="w-4 h-4" /> My Gardens
             </button>
             <span aria-hidden="true">/</span>
             <span>Track My Garden</span>
           </div>
-          <h1 className="font-display text-3xl sm:text-4xl font-semibold text-[#14261C]">{project.name}</h1>
-          <p className="text-base text-[#4A5D52]">
+          <h1 className="font-display text-3xl font-medium text-[#30573C]">{project.name}</h1>
+          <p className="text-base text-[#4E6656]">
             {placeLabel && <>{placeLabel} · </>}
-            <span className="font-semibold text-[#14261C]">{planted.length} of {states.length}</span> plants in the ground ·{' '}
+            <span className="font-semibold text-[#22392A]">{planted.length} of {states.length}</span> plants in the ground ·{' '}
             <span className="font-mono tabular-nums">{project.width} × {project.height} ft</span> · Zone {project.zone}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2.5">
-          <button type="button" onClick={onEditMap} className="inline-flex items-center gap-2 px-4 py-3 text-base font-semibold text-[#1B4332] bg-white hover:bg-[#EEF4F0] border border-[#CBD6CE] rounded-lg cursor-pointer">
+          <button type="button" onClick={onEditMap} className="inline-flex items-center gap-2 px-4 py-3 text-base font-semibold text-[#30573C] bg-white hover:bg-[#F3F1DC] border border-[#CCC8A8] rounded-full cursor-pointer">
             <MapIcon className="w-5 h-5" /> Edit garden map
           </button>
-          <button type="button" onClick={onOpenChecklist} className="inline-flex items-center gap-2 px-4 py-3 text-base font-semibold text-[#1B4332] bg-white hover:bg-[#EEF4F0] border border-[#CBD6CE] rounded-lg cursor-pointer">
+          <button type="button" onClick={onOpenChecklist} className="inline-flex items-center gap-2 px-4 py-3 text-base font-semibold text-[#30573C] bg-white hover:bg-[#F3F1DC] border border-[#CCC8A8] rounded-full cursor-pointer">
             <ClipboardList className="w-5 h-5" /> Seasonal care checklist
           </button>
         </div>
       </div>
 
-      {!tracking.zip && <ZipCard onSave={(zip, place) => updateTracking((t) => ({ ...t, zip, place }))} />}
 
-      {planted.length === 0 && states.length > 0 && (
-        <div className="flex items-center gap-3 bg-[#F2F7F4] border border-dashed border-[#9DB8A6] rounded-xl px-5 py-4 text-base text-[#14261C]">
-          <Lock className="w-5 h-5 text-[#1B4332] shrink-0" />
-          <span>
-            This is the garden you planned. <strong>Faded plants aren’t planted yet.</strong> Tap a plant once it’s in the ground to start tracking it.
-          </span>
-        </div>
-      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Map */}
-        <section className="lg:col-span-7 bg-white border border-[#E3E8E4] rounded-xl p-5 space-y-4">
+        <section className="lg:col-span-7 bg-white border border-[#E6E2CC] rounded-3xl p-4 space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="font-display text-xl font-semibold text-[#14261C]">Your garden map</h2>
+            <h2 className="font-display text-xl font-semibold text-[#22392A]">Your garden map</h2>
             <div className="flex bg-[#F2F5F3] rounded-lg p-1 gap-1" role="group" aria-label="Map view">
               {(
                 [
@@ -264,13 +256,21 @@ export function TrackerView({ project, onUpdateProject, onEditMap, onOpenCheckli
                   type="button"
                   aria-pressed={overlay === k}
                   onClick={() => setOverlay(k)}
-                  className={`px-3.5 py-2 text-sm font-semibold rounded-md cursor-pointer ${overlay === k ? 'bg-white text-[#14261C] shadow-sm' : 'text-[#4A5D52] hover:text-[#14261C]'}`}
+                  className={`px-3.5 py-2 text-sm font-semibold rounded-md cursor-pointer ${overlay === k ? 'bg-white text-[#22392A] shadow-sm' : 'text-[#4E6656] hover:text-[#22392A]'}`}
                 >
                   {l}
                 </button>
               ))}
             </div>
           </div>
+          {planted.length === 0 && states.length > 0 && (
+            <p className="flex items-center gap-2 text-[15px] text-[#3F5747] -mt-1">
+              <Lock className="w-4 h-4 text-[#30573C] shrink-0" />
+              <span>
+                <strong>Faded plants aren’t planted yet.</strong> Tap one once it’s in the ground.
+              </span>
+            </p>
+          )}
           <TrackMap
             project={project}
             states={states}
@@ -284,7 +284,9 @@ export function TrackerView({ project, onUpdateProject, onEditMap, onOpenCheckli
         </section>
 
         {/* Side panel */}
-        <aside className="lg:col-span-5 bg-white border border-[#E3E8E4] rounded-xl p-5 lg:sticky lg:top-24">
+        <div className="lg:col-span-5 space-y-4 lg:sticky lg:top-[92px]">
+        {!tracking.zip && <ZipCard onSave={(zip, place) => updateTracking((t) => ({ ...t, zip, place }))} />}
+        <aside className="bg-white border border-[#E6E2CC] rounded-3xl p-5">
           {selState ? (
             <PlantPanel
               key={selState.placement.uid + (selState.planted ? 'p' : 'n')}
@@ -305,6 +307,7 @@ export function TrackerView({ project, onUpdateProject, onEditMap, onOpenCheckli
             <Summary states={states} counts={counts} onSelect={setSelected} />
           )}
         </aside>
+        </div>
       </div>
 
       <WeatherSection
@@ -319,7 +322,7 @@ export function TrackerView({ project, onUpdateProject, onEditMap, onOpenCheckli
         forcedSample={Boolean(tracking.sampleWeather)}
       />
 
-      <p className="text-xs text-[#4A5D52] text-center">
+      <p className="text-xs text-[#4E6656] text-center">
         Sensor stake readings are simulated for this demo · Check-ins are read by Google Gemini · Weather from the US National Weather Service
       </p>
     </div>
@@ -329,22 +332,14 @@ export function TrackerView({ project, onUpdateProject, onEditMap, onOpenCheckli
 // ============================== map ==============================
 function TrackMap({ project, states, empty, stakes, overlay, selected, onSelect }: any) {
   const wrapRef = useRef<HTMLDivElement | null>(null);
-  const [w, setW] = useState(640);
-  useEffect(() => {
-    const el = wrapRef.current;
-    if (!el) return;
-    const ro = new ResizeObserver(([e]) => setW(e.contentRect.width));
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
-  const cell = Math.max(26, Math.min(64, Math.floor((w - 70) / project.width)));
+  const cell = useFitCell(wrapRef, project.width, project.height, { min: 24, max: 64, bottomGap: 110 });
 
   return (
-    <div ref={wrapRef} className="rounded-xl bg-[#4E6E3A] p-4 border-[6px] border-[#6E513B] shadow-inner overflow-x-auto">
+    <div ref={wrapRef} className="rounded-3xl bg-[#FFFDF3] p-4 border-[3px] border-[#30573C] overflow-x-auto">
       <div className="inline-block">
         <div className="flex items-center pl-7 mb-1.5">
           {Array.from({ length: project.width }, (_, c) => (
-            <div key={c} style={{ width: cell }} className="text-center font-mono text-[10px] text-white/80 tabular-nums select-none">
+            <div key={c} style={{ width: cell }} className="text-center font-mono text-[10px] text-[#30573C] tabular-nums select-none">
               {cell >= 34 || (c + 1) % 2 === 0 ? `${c + 1}ft` : ''}
             </div>
           ))}
@@ -352,7 +347,7 @@ function TrackMap({ project, states, empty, stakes, overlay, selected, onSelect 
         <div className="flex items-start">
           <div className="flex flex-col pr-1.5">
             {Array.from({ length: project.height }, (_, r) => (
-              <div key={r} style={{ height: cell }} className="w-5 flex items-center justify-end font-mono text-[10px] text-white/80 tabular-nums select-none">
+              <div key={r} style={{ height: cell }} className="w-5 flex items-center justify-end font-mono text-[10px] text-[#30573C] tabular-nums select-none">
                 {r + 1}
               </div>
             ))}
@@ -379,9 +374,9 @@ function TrackMap({ project, states, empty, stakes, overlay, selected, onSelect 
               stakes.map((s: any) => (
                 <div key={s.id} className="absolute z-10 pointer-events-none" style={{ left: s.x * cell - 7, top: s.y * cell - 16 }} title={s.name}>
                   <svg width="14" height="22" viewBox="0 0 14 22" aria-hidden="true">
-                    <rect x="1" y="0" width="12" height="8" rx="2.5" fill="#F8FAFC" stroke="#14261C" strokeWidth="1" />
-                    <circle cx="7" cy="4" r="1.8" fill="#1B4332" />
-                    <rect x="5.8" y="8" width="2.4" height="14" rx="1" fill="#F8FAFC" stroke="#14261C" strokeWidth="0.8" />
+                    <rect x="1" y="0" width="12" height="8" rx="2.5" fill="#F8FAFC" stroke="#22392A" strokeWidth="1" />
+                    <circle cx="7" cy="4" r="1.8" fill="#30573C" />
+                    <rect x="5.8" y="8" width="2.4" height="14" rx="1" fill="#F8FAFC" stroke="#22392A" strokeWidth="0.8" />
                   </svg>
                 </div>
               ))}
@@ -425,7 +420,7 @@ function TrackMap({ project, states, empty, stakes, overlay, selected, onSelect 
                       : {}),
                   }}
                   className={`group absolute rounded-full flex items-center justify-center cursor-pointer transition-transform ${
-                    s.planted ? 'z-30' : 'z-20 bg-[#D8F3DC]/40 border-2 border-dashed border-white/90'
+                    s.planted ? 'z-30' : 'z-20 bg-[#F9D3E2]/40 border-2 border-dashed border-white/90'
                   } ${sel ? 'ring-4 ring-[#FEF08A] scale-105 z-40' : 'hover:scale-105'}`}
                 >
                   <span className={s.planted ? '' : 'grayscale-[55%] opacity-75'}>
@@ -439,7 +434,7 @@ function TrackMap({ project, states, empty, stakes, overlay, selected, onSelect 
                   {(dia >= 70 || sel) && (
                     <span
                       className={`absolute -bottom-3 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-md text-[11px] font-semibold whitespace-nowrap shadow ${
-                        sel ? 'bg-[#14261C] text-white' : 'bg-white/95 text-[#14261C]'
+                        sel ? 'bg-[#22392A] text-white' : 'bg-white/95 text-[#22392A]'
                       }`}
                     >
                       {s.plant.name}
@@ -458,7 +453,7 @@ function TrackMap({ project, states, empty, stakes, overlay, selected, onSelect 
 function Legend({ overlay }: { overlay: string }) {
   if (overlay === 'sun')
     return (
-      <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-[#4A5D52]">
+      <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-[#4E6656]">
         {['Sun', 'Part Shade', 'Shade'].map((c) => (
           <span key={c} className="inline-flex items-center gap-1.5">
             <span className={`w-4 h-4 rounded-xs border border-[#64748B] ${lightOverlay(c)}`} /> {c}
@@ -468,7 +463,7 @@ function Legend({ overlay }: { overlay: string }) {
     );
   if (overlay === 'moisture')
     return (
-      <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-[#4A5D52]">
+      <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-[#4E6656]">
         {['Dry', 'Moist', 'Wet'].map((c) => (
           <span key={c} className="inline-flex items-center gap-1.5">
             <span className={`w-4 h-4 rounded-xs bg-white ${moistureOverlay(c)}`} /> {c}
@@ -477,7 +472,7 @@ function Legend({ overlay }: { overlay: string }) {
       </div>
     );
   return (
-    <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium text-[#14261C]">
+    <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium text-[#22392A]">
       {['thriving', 'ontrack', 'attention', 'risk'].map((k) => (
         <span key={k} className="inline-flex items-center gap-1.5">
           <span className="w-4 h-4 rounded-full border-[3px] bg-white" style={{ borderColor: STATUS[k].ring }} /> {STATUS[k].label}
@@ -486,9 +481,9 @@ function Legend({ overlay }: { overlay: string }) {
       <span className="inline-flex items-center gap-1.5">
         <span className="w-4 h-4 rounded-full border-2 border-dashed border-[#94A3B8] bg-[#F1F5F9]" /> Not planted yet
       </span>
-      <span className="inline-flex items-center gap-1.5 text-[#4A5D52]">
+      <span className="inline-flex items-center gap-1.5 text-[#4E6656]">
         <svg width="10" height="16" viewBox="0 0 14 22" aria-hidden="true">
-          <rect x="1" y="0" width="12" height="8" rx="2.5" fill="#F8FAFC" stroke="#14261C" />
+          <rect x="1" y="0" width="12" height="8" rx="2.5" fill="#F8FAFC" stroke="#22392A" />
           <rect x="5.8" y="8" width="2.4" height="14" rx="1" fill="#94A3B8" />
         </svg>
         Sensor stake
@@ -503,8 +498,8 @@ function Summary({ states, counts, onSelect }: { states: PlantState[]; counts: R
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="font-display text-xl font-semibold text-[#14261C]">Garden at a glance</h2>
-        <p className="text-base text-[#4A5D52] mt-1">Tap any plant on the map to see how it’s growing, log a check-in, or mark it as planted.</p>
+        <h2 className="font-display text-xl font-semibold text-[#22392A]">Garden at a glance</h2>
+        <p className="text-base text-[#4E6656] mt-1">Tap any plant on the map to see how it’s growing, log a check-in, or mark it as planted.</p>
       </div>
       <div className="grid grid-cols-2 gap-2.5">
         {['thriving', 'ontrack', 'attention', 'risk', 'planned'].map((k) => (
@@ -516,17 +511,17 @@ function Summary({ states, counts, onSelect }: { states: PlantState[]; counts: R
       </div>
       {needs.length > 0 && (
         <div className="space-y-2">
-          <h3 className="text-base font-semibold text-[#14261C]">Needs you</h3>
+          <h3 className="text-base font-semibold text-[#22392A]">Needs you</h3>
           {needs.map((s) => (
             <button
               key={s.placement.uid}
               type="button"
               onClick={() => onSelect(s.placement.uid)}
-              className="w-full flex items-center gap-3 p-2.5 rounded-lg border border-[#E3E8E4] hover:border-[#1B4332] text-left cursor-pointer"
+              className="w-full flex items-center gap-3 p-2.5 rounded-lg border border-[#E6E2CC] hover:border-[#30573C] text-left cursor-pointer"
             >
               <PlantAvatar plant={s.plant} rounded="full" size={40} />
               <span className="flex-1">
-                <span className="block font-semibold text-[#14261C]">{s.plant.name}</span>
+                <span className="block font-semibold text-[#22392A]">{s.plant.name}</span>
                 <span className={`inline-block mt-0.5 text-xs font-semibold px-2 py-0.5 rounded-full ${STATUS[s.status].pill}`}>{STATUS[s.status].label}</span>
               </span>
             </button>
@@ -546,9 +541,9 @@ function PanelHead({ plant, status, onClose, sub }: { plant: NativePlant; status
       </div>
       <div className="flex-1 min-w-0">
         <span className={`inline-block text-xs font-semibold px-2.5 py-1 rounded-full ${S.pill}`}>{S.label}</span>
-        <h2 className="font-display text-2xl font-semibold text-[#14261C] leading-tight mt-1">{plant.name}</h2>
-        <p className="text-sm text-[#4A5D52] italic">{plant.sci}</p>
-        <p className="text-sm text-[#4A5D52]">{sub}</p>
+        <h2 className="font-display text-2xl font-semibold text-[#22392A] leading-tight mt-1">{plant.name}</h2>
+        <p className="text-sm text-[#4E6656] italic">{plant.sci}</p>
+        <p className="text-sm text-[#4E6656]">{sub}</p>
       </div>
       <button type="button" onClick={onClose} aria-label="Close" className="w-11 h-11 rounded-lg bg-[#F2F5F3] hover:bg-[#E4ECE7] flex items-center justify-center cursor-pointer shrink-0">
         <X className="w-5 h-5" />
@@ -575,15 +570,15 @@ function PlantPanel({ s, project, track, today, now, busy, onClose, onPlant, onC
 
       {mode === 'remove' ? (
         <div className="space-y-3">
-          <p className="text-lg font-semibold text-[#14261C]">What happened?</p>
-          <p className="text-sm text-[#4A5D52]">It’s saved to your garden journal, and the spot opens up for a new plant.</p>
-          <button type="button" onClick={() => onRemove('natural')} className="w-full text-left px-4 py-3.5 text-base font-semibold border border-[#CBD6CE] rounded-lg hover:border-[#1B4332] cursor-pointer">
+          <p className="text-lg font-semibold text-[#22392A]">What happened?</p>
+          <p className="text-sm text-[#4E6656]">It’s saved to your garden journal, and the spot opens up for a new plant.</p>
+          <button type="button" onClick={() => onRemove('natural')} className="w-full text-left px-4 py-3.5 text-base font-semibold border border-[#CCC8A8] rounded-lg hover:border-[#30573C] cursor-pointer">
             It lived out its natural life
           </button>
-          <button type="button" onClick={() => onRemove('early')} className="w-full text-left px-4 py-3.5 text-base font-semibold border border-[#CBD6CE] rounded-lg hover:border-[#1B4332] cursor-pointer">
+          <button type="button" onClick={() => onRemove('early')} className="w-full text-left px-4 py-3.5 text-base font-semibold border border-[#CCC8A8] rounded-lg hover:border-[#30573C] cursor-pointer">
             It died early (weather, pests, disease)
           </button>
-          <button type="button" onClick={() => setMode('info')} className="w-full py-3 text-base font-semibold text-[#1B4332] cursor-pointer">
+          <button type="button" onClick={() => setMode('info')} className="w-full py-3 text-base font-semibold text-[#30573C] cursor-pointer">
             Never mind, keep it
           </button>
         </div>
@@ -591,30 +586,30 @@ function PlantPanel({ s, project, track, today, now, busy, onClose, onPlant, onC
         <>
           <section className="space-y-2">
             <div className="flex items-baseline justify-between gap-2">
-              <h3 className="text-base font-semibold text-[#14261C]">Growth vs. expected</h3>
-              <span className="text-base font-semibold text-[#14261C]">
-                {last ? last.score : '—'} <span className="font-normal text-[#4A5D52]">/ expected {exp}</span>
+              <h3 className="text-base font-semibold text-[#22392A]">Growth vs. expected</h3>
+              <span className="text-base font-semibold text-[#22392A]">
+                {last ? last.score : '—'} <span className="font-normal text-[#4E6656]">/ expected {exp}</span>
               </span>
             </div>
             <GrowthChart species={sp} logs={s.logs} today={s.today} base={s.base} ring={STATUS[s.status].ring} />
-            <p className="text-sm text-[#4A5D52]">
+            <p className="text-sm text-[#4E6656]">
               Growth score = size and health compared with a fully grown, healthy plant (100). It combines height with leaf color, flowers, wilting, pests and disease.
             </p>
           </section>
 
           {readings ? (
             <section className="space-y-2">
-              <h3 className="text-base font-semibold text-[#14261C]">Live from the {s.stake.name.toLowerCase()}</h3>
+              <h3 className="text-base font-semibold text-[#22392A]">Live from the {s.stake.name.toLowerCase()}</h3>
               <div className="grid grid-cols-3 gap-2">
                 <Tile label="Soil moisture" value={`${readings.moisture}%`} cls="bg-[#EFF6FF] text-[#1E3A8A]" />
                 <Tile label="Soil temp" value={`${readings.soilTempF}°F`} cls="bg-[#FFF7ED] text-[#7C2D12]" />
                 <Tile label="Sun today" value={`${readings.sunHours} h`} cls="bg-[#FEFCE8] text-[#713F12]" />
               </div>
-              <p className="text-sm text-[#4A5D52]">The stake camera measures this plant every week and updates its score automatically.</p>
+              <p className="text-sm text-[#4E6656]">The stake camera measures this plant every week and updates its score automatically.</p>
             </section>
           ) : (
             <section className="space-y-3">
-              <h3 className="text-base font-semibold text-[#14261C]">How is it doing?</h3>
+              <h3 className="text-base font-semibold text-[#22392A]">How is it doing?</h3>
               {s.logs.length <= 1 && s.today > 6 && (
                 <p className="text-sm font-semibold text-[#78350F] bg-[#FEF3C7] rounded-lg px-3 py-2">No check-in yet. Tell us how it looks to keep its score up to date.</p>
               )}
@@ -625,17 +620,17 @@ function PlantPanel({ s, project, track, today, now, busy, onClose, onPlant, onC
 
           <section className="bg-[#F6F8F6] rounded-lg p-4 space-y-2">
             <div className="flex flex-wrap justify-between gap-2 text-sm">
-              <span className="font-semibold text-[#14261C]">Life so far</span>
-              <span className="text-[#4A5D52]">
+              <span className="font-semibold text-[#22392A]">Life so far</span>
+              <span className="text-[#4E6656]">
                 {ageText(s.today)} · usually lives {sp.lifespan_label}
               </span>
             </div>
-            <div className="h-3 bg-[#E3E8E4] rounded-full overflow-hidden">
+            <div className="h-3 bg-[#E6E2CC] rounded-full overflow-hidden">
               <div className="h-full bg-[#40916C] rounded-full" style={{ width: `${lifePct}%` }} />
             </div>
           </section>
 
-          <button type="button" onClick={() => setMode('remove')} className="w-full py-3 text-base font-semibold text-[#7F1D1D] bg-white border border-[#E3E8E4] hover:border-[#DC2626] rounded-lg cursor-pointer">
+          <button type="button" onClick={() => setMode('remove')} className="w-full py-3 text-base font-semibold text-[#7F1D1D] bg-white border border-[#E6E2CC] hover:border-[#DC2626] rounded-lg cursor-pointer">
             This plant died · remove it
           </button>
         </>
@@ -667,14 +662,14 @@ function PlantItPanel({ s, sub, onClose, onPlant }: any) {
   return (
     <div className="space-y-5">
       <PanelHead plant={s.plant} status="planned" onClose={onClose} sub={sub} />
-      <p className="text-base text-[#3D4F44] leading-relaxed">This plant is in your plan but not in the ground yet. Once you plant it, we’ll start tracking how it grows.</p>
-      <ul className="text-sm text-[#3D4F44] space-y-1 list-disc pl-5">
+      <p className="text-base text-[#3F5747] leading-relaxed">This plant is in your plan but not in the ground yet. Once you plant it, we’ll start tracking how it grows.</p>
+      <ul className="text-sm text-[#3F5747] space-y-1 list-disc pl-5">
         <li>Grows to about {s.plant.heightFt || `${Math.round(sp.height_cm / 30.48)} ft`}</li>
         <li>Flowers: {s.plant.bloom || 'seasonal'}</li>
         <li>Usually lives {sp.lifespan_label}</li>
       </ul>
       <div className="space-y-2">
-        <p className="text-base font-semibold text-[#14261C]">When did you plant it?</p>
+        <p className="text-base font-semibold text-[#22392A]">When did you plant it?</p>
         <div className="flex flex-wrap gap-2">
           {opts.map(([l, d]) => (
             <button
@@ -682,7 +677,7 @@ function PlantItPanel({ s, sub, onClose, onPlant }: any) {
               type="button"
               aria-pressed={when === iso(d)}
               onClick={() => setWhen(iso(d))}
-              className={`px-4 py-2.5 text-sm font-semibold rounded-full border cursor-pointer ${when === iso(d) ? 'border-[#1B4332] bg-[#E7F0EA] text-[#14261C]' : 'border-[#CBD6CE] bg-white text-[#3D4F44]'}`}
+              className={`px-4 py-2.5 text-sm font-semibold rounded-full border cursor-pointer ${when === iso(d) ? 'border-[#30573C] bg-[#EEEBD2] text-[#22392A]' : 'border-[#CCC8A8] bg-white text-[#3F5747]'}`}
             >
               {l}
             </button>
@@ -693,11 +688,11 @@ function PlantItPanel({ s, sub, onClose, onPlant }: any) {
             max={todayIso}
             value={when}
             onChange={(e) => e.target.value && setWhen(e.target.value)}
-            className="px-3 py-2 text-sm border border-[#CBD6CE] rounded-full"
+            className="px-3 py-2 text-sm border border-[#CCC8A8] rounded-full"
           />
         </div>
       </div>
-      <button type="button" onClick={() => onPlant(when)} className="w-full inline-flex items-center justify-center gap-2 py-4 text-lg font-semibold text-white bg-[#1B4332] hover:bg-[#2D6A4F] rounded-lg cursor-pointer">
+      <button type="button" onClick={() => onPlant(when)} className="w-full inline-flex items-center justify-center gap-2 py-4 text-lg font-semibold text-white bg-[#30573C] hover:bg-[#3E6E4D] rounded-lg cursor-pointer">
         <CheckCircle2 className="w-5 h-5" /> Yes, I planted it
       </button>
     </div>
@@ -728,8 +723,8 @@ function EmptySpotPanel({ project, spot, onClose, onPick }: any) {
       <div className="flex items-start justify-between gap-3">
         <div>
           <span className="inline-block text-xs font-semibold px-2.5 py-1 rounded-full bg-[#F1F5F9] text-[#334155]">Empty spot</span>
-          <h2 className="font-display text-2xl font-semibold text-[#14261C] mt-1">Plant something new here?</h2>
-          <p className="text-sm text-[#4A5D52]">
+          <h2 className="font-display text-2xl font-semibold text-[#22392A] mt-1">Plant something new here?</h2>
+          <p className="text-sm text-[#4E6656]">
             Where {spot.was} was · {cell.sun} · {cell.moisture} soil
           </p>
         </div>
@@ -737,27 +732,27 @@ function EmptySpotPanel({ project, spot, onClose, onPick }: any) {
           <X className="w-5 h-5" />
         </button>
       </div>
-      <p className="text-sm text-[#4A5D52]">Massachusetts natives that like this spot’s light and soil, and fit without crowding neighbors:</p>
-      {list === null && <p className="text-base text-[#4A5D52]">Finding plants…</p>}
-      {list && list.length === 0 && <p className="text-base text-[#4A5D52]">No matching plant fits this exact spot. Try “Edit garden map” to adjust the layout.</p>}
+      <p className="text-sm text-[#4E6656]">Massachusetts natives that like this spot’s light and soil, and fit without crowding neighbors:</p>
+      {list === null && <p className="text-base text-[#4E6656]">Finding plants…</p>}
+      {list && list.length === 0 && <p className="text-base text-[#4E6656]">No matching plant fits this exact spot. Try “Edit garden map” to adjust the layout.</p>}
       <div className="space-y-2 max-h-[440px] overflow-auto pr-1">
         {(list || []).map((pl) => (
           <button
             key={pl.id}
             type="button"
             onClick={() => onPick(pl)}
-            className="w-full flex items-center gap-3 p-2.5 rounded-lg border border-[#E3E8E4] hover:border-[#1B4332] text-left cursor-pointer"
+            className="w-full flex items-center gap-3 p-2.5 rounded-lg border border-[#E6E2CC] hover:border-[#30573C] text-left cursor-pointer"
           >
             <PlantAvatar plant={pl} rounded="full" size={44} />
             <span className="flex-1 min-w-0">
-              <span className="block font-semibold text-[#14261C]">{pl.name}</span>
-              <span className="block text-sm text-[#4A5D52] italic truncate">{pl.sci}</span>
+              <span className="block font-semibold text-[#22392A]">{pl.name}</span>
+              <span className="block text-sm text-[#4E6656] italic truncate">{pl.sci}</span>
             </span>
-            <span className="text-sm font-mono tabular-nums text-[#4A5D52]">{pl.spreadFt} ft</span>
+            <span className="text-sm font-mono tabular-nums text-[#4E6656]">{pl.spreadFt} ft</span>
           </button>
         ))}
       </div>
-      <button type="button" onClick={onClose} className="w-full py-3 text-base font-semibold text-[#1B4332] cursor-pointer">
+      <button type="button" onClick={onClose} className="w-full py-3 text-base font-semibold text-[#30573C] cursor-pointer">
         Leave this spot empty for now
       </button>
     </div>
@@ -795,7 +790,7 @@ function CheckIn({ busy, onSubmit }: { busy: boolean; onSubmit: (p: { note: stri
 
   return (
     <div className="space-y-2.5">
-      <label htmlFor="checkin-note" className="block text-sm text-[#4A5D52]">
+      <label htmlFor="checkin-note" className="block text-sm text-[#4E6656]">
         No sensor here. Type, say, or snap a photo of what you see: height, leaf color, flowers, anything odd.
       </label>
       <textarea
@@ -804,12 +799,12 @@ function CheckIn({ busy, onSubmit }: { busy: boolean; onSubmit: (p: { note: stri
         value={text}
         onChange={(e) => setText(e.target.value)}
         placeholder="e.g. About 16 inches tall, leaves are green but a couple at the bottom are yellow. I see flower buds."
-        className="w-full px-3.5 py-3 text-base border border-[#CBD6CE] rounded-lg focus:outline-none focus:border-[#1B4332] bg-[#FCFDFC]"
+        className="w-full px-3.5 py-3 text-base border border-[#CCC8A8] rounded-lg focus:outline-none focus:border-[#30573C] bg-[#FCFDFC]"
       />
       {photo && (
         <div className="flex items-center gap-3">
           <img src={photo.previewUrl} alt="Your plant" className="w-20 h-20 object-cover rounded-lg" />
-          <button type="button" onClick={() => setPhoto(null)} className="text-sm font-semibold text-[#1B4332] cursor-pointer">
+          <button type="button" onClick={() => setPhoto(null)} className="text-sm font-semibold text-[#30573C] cursor-pointer">
             Remove photo
           </button>
         </div>
@@ -820,18 +815,18 @@ function CheckIn({ busy, onSubmit }: { busy: boolean; onSubmit: (p: { note: stri
             type="button"
             aria-pressed={speech.listening}
             onClick={() => (speech.listening ? speech.stop() : speech.start(text))}
-            className={`inline-flex items-center gap-2 px-4 py-3 text-base font-semibold rounded-lg border cursor-pointer ${speech.listening ? 'border-[#DC2626] bg-[#FEE2E2] text-[#7F1D1D]' : 'border-[#CBD6CE] bg-white text-[#14261C]'}`}
+            className={`inline-flex items-center gap-2 px-4 py-3 text-base font-semibold rounded-lg border cursor-pointer ${speech.listening ? 'border-[#DC2626] bg-[#FEE2E2] text-[#7F1D1D]' : 'border-[#CCC8A8] bg-white text-[#22392A]'}`}
           >
             <Mic className="w-5 h-5" /> {speech.listening ? 'Stop recording' : 'Speak'}
           </button>
         ) : (
-          <span className="text-sm text-[#4A5D52] self-center">Voice works in Chrome, Edge or Safari.</span>
+          <span className="text-sm text-[#4E6656] self-center">Voice works in Chrome, Edge or Safari.</span>
         )}
-        <button type="button" onClick={() => fileRef.current?.click()} className="inline-flex items-center gap-2 px-4 py-3 text-base font-semibold rounded-lg border border-[#CBD6CE] bg-white text-[#14261C] cursor-pointer">
+        <button type="button" onClick={() => fileRef.current?.click()} className="inline-flex items-center gap-2 px-4 py-3 text-base font-semibold rounded-lg border border-[#CCC8A8] bg-white text-[#22392A] cursor-pointer">
           <Camera className="w-5 h-5" /> Photo
         </button>
         <input ref={fileRef} type="file" accept="image/*" capture="environment" hidden onChange={pick} />
-        <button type="button" onClick={save} disabled={busy} className="flex-1 min-w-[140px] px-4 py-3 text-base font-semibold text-white bg-[#1B4332] hover:bg-[#2D6A4F] disabled:opacity-60 rounded-lg cursor-pointer">
+        <button type="button" onClick={save} disabled={busy} className="flex-1 min-w-[140px] px-4 py-3 text-base font-semibold text-white bg-[#30573C] hover:bg-[#3E6E4D] disabled:opacity-60 rounded-full cursor-pointer">
           {busy ? 'Reading your update…' : 'Save update'}
         </button>
       </div>
@@ -843,7 +838,9 @@ function CheckIn({ busy, onSubmit }: { busy: boolean; onSubmit: (p: { note: stri
 
 function Analysis({ a }: { a: any }) {
   const f = a.features || {};
+  const COND: Record<string, string> = { excellent: 'Excellent', good: 'Good', fair: 'Fair', poor: 'Poor', dying: 'Dying', unknown: 'Not said' };
   const rows: [string, string][] = [
+    ['Overall', COND[f.overall_condition] || 'Not said'],
     ['Height', f.height_cm ? `${Math.round(f.height_cm / 2.54)} in (${Math.round(f.height_cm)} cm)` : 'Not mentioned'],
     ['Leaves', ({ healthy_green: 'Healthy green', pale_or_yellowing: 'Pale or yellowing', browning: 'Browning', not_mentioned: 'Not mentioned' } as any)[f.leaf_color] || '—'],
     ['Flowers', ({ blooming: 'Blooming', buds: 'Buds forming', none: 'None yet', not_mentioned: 'Not mentioned' } as any)[f.flowering] || '—'],
@@ -854,14 +851,19 @@ function Analysis({ a }: { a: any }) {
       <div className="flex items-center gap-2 font-semibold text-[#4C1D95]">
         <Sparkles className="w-5 h-5" /> Garden helper read your update · new score {a.score}
       </div>
-      {a.summary && a.source === 'gemini' && <p className="text-base text-[#14261C]">{a.summary}</p>}
+      {a.summary && a.source === 'gemini' && <p className="text-base text-[#22392A]">{a.summary}</p>}
       {rows.map(([k, v]) => (
         <div key={k} className="flex justify-between gap-3 text-sm border-b border-[#EDE9FE] pb-1">
           <span className="font-semibold">{k}</span>
           <span className="text-right">{v}</span>
         </div>
       ))}
-      <p className={`text-base font-semibold ${a.urgent ? 'text-[#7F1D1D]' : 'text-[#14261C]'}`}>{a.advice}</p>
+      <p className={`text-base font-semibold ${a.urgent ? 'text-[#7F1D1D]' : 'text-[#22392A]'}`}>{a.advice}</p>
+      {a.follow_up_question && (
+        <p className="text-base bg-white border border-[#DDD6FE] rounded-lg px-3 py-2 text-[#4C1D95]">
+          <span className="font-semibold">To score it more accurately:</span> {a.follow_up_question}
+        </p>
+      )}
       <p className="text-xs text-[#6B7280]">{a.source === 'gemini' ? `Read by Google Gemini (${a.model})` : 'Read by the simple backup reader. Gemini wasn’t reachable.'}</p>
     </div>
   );
@@ -898,24 +900,24 @@ function GrowthChart({ species, logs, today, base, ring }: any) {
       <svg viewBox={`0 0 ${W} 170`} width="100%" role="img" aria-label="Growth score compared with expected growth" className="block bg-[#F6F8F6] rounded-lg">
         {[0, 50, 100].map((v) => (
           <g key={v}>
-            <line x1={L} x2={R} y1={Y(v)} y2={Y(v)} stroke="#E3E8E4" />
-            <text x={L - 5} y={Y(v) + 3} textAnchor="end" fontSize="9" fill="#4A5D52">
+            <line x1={L} x2={R} y1={Y(v)} y2={Y(v)} stroke="#E6E2CC" />
+            <text x={L - 5} y={Y(v) + 3} textAnchor="end" fontSize="9" fill="#4E6656">
               {v}
             </text>
           </g>
         ))}
         {ticks.map((d) => (
-          <text key={d} x={X(d)} y={B + 14} textAnchor="middle" fontSize="9" fill="#4A5D52">
+          <text key={d} x={X(d)} y={B + 14} textAnchor="middle" fontSize="9" fill="#4E6656">
             {d / 30} mo
           </text>
         ))}
         {tx - L > 40 && (
-          <text x={L} y={B + 14} fontSize="9" fill="#4A5D52">
+          <text x={L} y={B + 14} fontSize="9" fill="#4E6656">
             Planted
           </text>
         )}
         <line x1={tx} x2={tx} y1={T} y2={B} stroke="#94A3B8" strokeDasharray="3 3" />
-        <text x={tx - L < 20 ? L : tx} y={B + 14} textAnchor={tx - L < 20 ? 'start' : tx > R - 24 ? 'end' : 'middle'} fontSize="9" fontWeight="700" fill="#14261C">
+        <text x={tx - L < 20 ? L : tx} y={B + 14} textAnchor={tx - L < 20 ? 'start' : tx > R - 24 ? 'end' : 'middle'} fontSize="9" fontWeight="700" fill="#22392A">
           {today === 0 ? 'Planted today' : 'Today'}
         </text>
         <path d={exp} fill="none" stroke="#94A3B8" strokeWidth="2" strokeDasharray="5 4" />
@@ -928,7 +930,7 @@ function GrowthChart({ species, logs, today, base, ring }: any) {
           ),
         )}
       </svg>
-      <div className="flex gap-4 text-sm text-[#4A5D52]">
+      <div className="flex gap-4 text-sm text-[#4E6656]">
         <span className="inline-flex items-center gap-1.5">
           <span className="w-5 h-1 rounded" style={{ background: ring }} /> Your plant
         </span>
@@ -964,10 +966,10 @@ function ZipCard({ onSave }: { onSave: (zip: string, place: any) => void }) {
     }
   }
   return (
-    <form onSubmit={go} className="bg-white border border-[#E3E8E4] rounded-xl p-5 flex flex-col md:flex-row md:items-end gap-4">
+    <form onSubmit={go} className="bg-white border-[2.5px] border-[#30573C] rounded-[32px] px-5 py-4 flex flex-col gap-3">
       <div className="flex-1">
-        <h2 className="font-display text-xl font-semibold text-[#14261C]">Where is this garden?</h2>
-        <p className="text-base text-[#4A5D52]">Your ZIP code gives you a local 7-day forecast and weather alerts for your plants.</p>
+        <h2 className="font-display text-lg font-medium text-[#30573C]">Where is this garden?</h2>
+        <p className="text-base text-[#4E6656]">Your ZIP code gives you a local 7-day forecast and weather alerts for your plants.</p>
       </div>
       <div className="flex gap-2">
         <input
@@ -977,13 +979,13 @@ function ZipCard({ onSave }: { onSave: (zip: string, place: any) => void }) {
           value={zip}
           onChange={(e) => setZip(e.target.value.replace(/\D/g, ''))}
           placeholder="02481"
-          className="w-36 px-4 py-3 text-xl font-mono tracking-widest text-center border border-[#CBD6CE] rounded-lg focus:outline-none focus:border-[#1B4332]"
+          className="w-36 px-4 py-2 text-xl font-mono tracking-widest text-center border border-[#CCC8A8] rounded-lg focus:outline-none focus:border-[#30573C]"
         />
-        <button disabled={busy} className="px-5 py-3 text-base font-semibold text-white bg-[#1B4332] hover:bg-[#2D6A4F] rounded-lg cursor-pointer disabled:opacity-60">
+        <button disabled={busy} className="px-5 py-3 text-base font-semibold text-white bg-[#30573C] hover:bg-[#3E6E4D] rounded-full cursor-pointer disabled:opacity-60">
           {busy ? 'Looking up…' : 'Save'}
         </button>
       </div>
-      {err && <p className="text-sm text-[#7F1D1D] md:basis-full">{err}</p>}
+      {err && <p className="text-sm text-[#7F1D1D]">{err}</p>}
     </form>
   );
 }
@@ -1007,8 +1009,8 @@ function WeatherSection({ days, loading, place, ctx, sample, note, noZip, onTogg
   const [sel, setSel] = useState(0);
   if (loading)
     return (
-      <section className="bg-white border border-[#E3E8E4] rounded-xl p-5">
-        <p className="text-base text-[#4A5D52]">Getting your forecast…</p>
+      <section className="bg-white border border-[#E6E2CC] rounded-3xl p-5">
+        <p className="text-base text-[#4E6656]">Getting your forecast…</p>
       </section>
     );
   if (!days?.length) return null;
@@ -1017,13 +1019,13 @@ function WeatherSection({ days, loading, place, ctx, sample, note, noZip, onTogg
   const ins: any = insightsFor(days, i, ctx);
   const top = ins.alerts[0];
   return (
-    <section className="bg-white border border-[#E3E8E4] rounded-xl p-5 space-y-4" aria-label="This week's weather">
+    <section className="bg-white border border-[#E6E2CC] rounded-3xl p-5 space-y-4" aria-label="This week's weather">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
-        <h2 className="font-display text-xl font-semibold text-[#14261C]">This week{place ? ` in ${place}` : ''}</h2>
-        <div className="flex flex-wrap items-center gap-3 text-sm text-[#4A5D52]">
+        <h2 className="font-display text-xl font-semibold text-[#22392A]">This week{place ? ` in ${place}` : ''}</h2>
+        <div className="flex flex-wrap items-center gap-3 text-sm text-[#4E6656]">
           <span>{sample ? (noZip ? 'Sample summer week · add your ZIP for real weather' : 'Sample summer heat-wave week (demo)') : 'Point at or tap a day to see what it means for your garden'}</span>
           {!noZip && (
-            <button type="button" onClick={onToggleSample} className="font-semibold text-[#1B4332] underline underline-offset-4 cursor-pointer">
+            <button type="button" onClick={onToggleSample} className="font-semibold text-[#30573C] underline underline-offset-4 cursor-pointer">
               {forcedSample ? 'Show real forecast' : 'Preview a summer heat wave'}
             </button>
           )}
@@ -1041,21 +1043,21 @@ function WeatherSection({ days, loading, place, ctx, sample, note, noZip, onTogg
               onMouseEnter={() => setSel(k)}
               onFocus={() => setSel(k)}
               onClick={() => setSel(k)}
-              className={`relative flex flex-col items-center gap-1 rounded-xl py-3 border-2 cursor-pointer transition-transform ${
-                on ? 'border-[#1B4332] bg-[#F2F7F4] -translate-y-0.5' : (d.hi ?? 0) >= 88 ? 'border-transparent bg-[#FFF7ED]' : (d.lo ?? 99) <= 32 ? 'border-transparent bg-[#EFF6FF]' : 'border-transparent bg-[#F6F8F6]'
+              className={`relative flex flex-col items-center gap-1 rounded-3xl py-3 border-2 cursor-pointer transition-transform ${
+                on ? 'border-[#30573C] bg-[#F7F5E5] -translate-y-0.5' : (d.hi ?? 0) >= 88 ? 'border-transparent bg-[#FFF7ED]' : (d.lo ?? 99) <= 32 ? 'border-transparent bg-[#EFF6FF]' : 'border-transparent bg-[#F6F8F6]'
               }`}
             >
               {a && <span className={`absolute top-1.5 right-1.5 w-5 h-5 rounded-full text-white text-xs font-bold flex items-center justify-center ${LEVEL[a.level].badge}`}>!</span>}
-              <span className="text-base font-semibold text-[#14261C]">{dayLabel(d, k)}</span>
+              <span className="text-base font-semibold text-[#22392A]">{dayLabel(d, k)}</span>
               <WeatherIcon kind={iconFor(d)} />
-              <span className="font-mono tabular-nums text-lg font-semibold text-[#14261C]">{d.hi != null ? `${d.hi}°` : '—'}</span>
-              <span className="font-mono tabular-nums text-sm text-[#4A5D52]">{d.lo != null ? `${d.lo}°` : ''}</span>
+              <span className="font-mono tabular-nums text-lg font-semibold text-[#22392A]">{d.hi != null ? `${d.hi}°` : '—'}</span>
+              <span className="font-mono tabular-nums text-sm text-[#4E6656]">{d.lo != null ? `${d.lo}°` : ''}</span>
             </button>
           );
         })}
       </div>
-      <div className="bg-[#F6F8F6] rounded-xl p-4 space-y-3">
-        <div className="font-display text-lg font-semibold text-[#14261C]">
+      <div className="bg-[#F6F8F6] rounded-3xl p-4 space-y-3">
+        <div className="font-display text-lg font-semibold text-[#22392A]">
           {fullDate(day)} · {day.short}
           {day.hi != null && ` · high ${day.hi}°`}
           {day.lo != null && ` · low ${day.lo}°`} · rain {day.pop}%
@@ -1070,7 +1072,7 @@ function WeatherSection({ days, loading, place, ctx, sample, note, noZip, onTogg
           <InfoTile head="Plant growth" color="text-[#14532D]" value={ins.growth.label} note={ins.growth.note} />
         </div>
       </div>
-      {note && <p className="text-sm text-[#4A5D52]">Live forecast unavailable ({note}). Showing a sample week.</p>}
+      {note && <p className="text-sm text-[#4E6656]">Live forecast unavailable ({note}). Showing a sample week.</p>}
     </section>
   );
 }
@@ -1079,8 +1081,8 @@ function InfoTile({ head, color, value, note }: { head: string; color: string; v
   return (
     <div className="bg-white rounded-lg p-3.5 space-y-1">
       <div className={`text-xs font-bold uppercase tracking-wide ${color}`}>{head}</div>
-      {value && <div className="text-base font-semibold text-[#14261C]">{value}</div>}
-      <p className="text-sm text-[#3D4F44] leading-snug">{note}</p>
+      {value && <div className="text-base font-semibold text-[#22392A]">{value}</div>}
+      <p className="text-sm text-[#3F5747] leading-snug">{note}</p>
     </div>
   );
 }

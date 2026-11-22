@@ -133,7 +133,14 @@ export default function App() {
     setView('home');
   };
 
-  const handleCreateProject = (name: string, width: number, height: number, zone: MAZone) => {
+  const handleCreateProject = (
+    name: string,
+    width: number,
+    height: number,
+    zone: MAZone,
+    zip: string,
+    place: { city: string; state: string } | null
+  ) => {
     if (!userEmail) return;
     const cells: GridCell[][] = Array.from({ length: height }, () =>
       Array.from({ length: width }, () => ({ sun: 'Sun', moisture: 'Moist' }))
@@ -155,6 +162,8 @@ export default function App() {
       }),
       tasks: generateTasksForProject([]),
       logs: [],
+      // ZIP is asked up front (team design), so weather is ready in Track My Garden
+      tracking: { zip, place, plants: {}, empty: [], journal: [] },
     };
 
     const next = [newProj, ...projects];
@@ -221,7 +230,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F9FAF8] text-[#14261C]">
+    <div className="min-h-screen flex flex-col bg-[#FFFDF3] text-[#22392A]">
       <Header
         currentView={view}
         userEmail={userEmail}
@@ -297,28 +306,28 @@ export default function App() {
         )}
       </main>
 
-      <footer className="border-t border-[#E3E8E4] bg-white mt-12">
-        <div className="max-w-[1360px] mx-auto px-4 sm:px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#4A5D52]">
-          <div>BayState Bloom · Massachusetts Native Garden Planner (USDA Zones 5b–7a)</div>
+      <footer className="border-t border-[#E6E2CC] bg-white mt-12">
+        <div className="max-w-[1360px] mx-auto px-4 sm:px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#4E6656]">
+          <div>home grown · Massachusetts native garden planner (USDA Zones 5b–7a)</div>
           <div className="flex items-center gap-5">
             <button
               type="button"
               onClick={() => setView('home')}
-              className="hover:text-[#14261C] cursor-pointer"
+              className="hover:text-[#22392A] cursor-pointer"
             >
               Mission
             </button>
             <button
               type="button"
               onClick={() => setView('catalog')}
-              className="hover:text-[#14261C] cursor-pointer"
+              className="hover:text-[#22392A] cursor-pointer"
             >
               Native Plant Guide
             </button>
             <button
               type="button"
               onClick={handleStartPlanning}
-              className="hover:text-[#14261C] cursor-pointer"
+              className="hover:text-[#22392A] cursor-pointer"
             >
               Start a Garden
             </button>
