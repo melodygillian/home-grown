@@ -1,9 +1,9 @@
 // Expected growth, growth score and health status.
 //
-// Growth score = how big and healthy the plant is, as a % of a fully grown, healthy plant.
-// It starts from height (as % of mature height) and is nudged by leaf color, flowers,
-// wilting, pests and disease. Gemini extracts those features; this file turns them into a number,
-// so the scoring is consistent and easy to explain to judges.
+// Growth score = how big and healthy the plant is compared with a fully grown, healthy plant (100).
+// When Gemini reads a check-in, it gives the score itself (growth_score), judging the plant against
+// a normal, healthy plant of the same species at the same age. If Gemini isn't available, the score
+// is estimated from height, leaf color, flowers, problems and the gardener's overall impression.
 
 const DAY = 24 * 60 * 60 * 1000;
 export const START_PCT = 30; // a nursery-pot plant is roughly 30% of its mature height
@@ -39,12 +39,20 @@ export function expectedScore(species, t, base = START_PCT) {
   return base + (end - base) * f;
 }
 
-/** Turn features (from Gemini or the fallback reader) into a growth score. */
+/** Turn a check-in reading into a growth score. */
 export function scoreFromFeatures(species, features, previousHeightPct, expected) {
-  const heightPct =
-    features.height_cm != null && features.height_cm > 0
-      ? (features.height_cm / species.height_cm) * 100
-      : previousHeightPct ?? expected;
+  const hasHeight = features.height_cm != null && features.height_cm > 0;
+  const heightPct = hasHeight ? (features.height_cm / species.height_cm) * 100 : null;
+
+  // 1) Gemini's own judgment against a normal, healthy plant of this species and age.
+  if (Number.isFinite(features.growth_score)) {
+    return { score: Math.max(3, Math.min(130, Math.round(features.growth_score))), heightPct: heightPct ?? previousHeightPct ?? null };
+  }
+
+  // 2) Backup estimate when Gemini isn't available.
+  const size = heightPct ?? previousHeightPct ?? expected;
+  const CONDITION = { excellent: 1.08, good: 1.0, fair: 0.9, poor: 0.78, dying: 0.45 };
+  const mult = CONDITION[features.overall_condition] ?? 1;
   let adj = 0;
   if (features.leaf_color === 'healthy_green') adj += 2;
   if (features.leaf_color === 'pale_or_yellowing') adj -= 8;
@@ -54,9 +62,10 @@ export function scoreFromFeatures(species, features, previousHeightPct, expected
   if (features.disease_signs) adj -= 10;
   if (features.flowering === 'blooming' || features.flowering === 'buds') adj += 3;
   if (features.new_growth) adj += 3;
+  adj -= 6 * Math.min(3, (features.concerns || []).length);
   return {
-    score: Math.max(3, Math.min(130, Math.round(heightPct + adj))),
-    heightPct: features.height_cm != null && features.height_cm > 0 ? heightPct : previousHeightPct ?? null,
+    score: Math.max(3, Math.min(130, Math.round(size * mult + adj))),
+    heightPct: heightPct ?? previousHeightPct ?? null,
   };
 }
 
@@ -83,8 +92,10 @@ export function statusOf(plant, species) {
   let st = r >= 1.08 ? 'thriving' : r >= 0.9 ? 'ontrack' : r >= 0.75 ? 'attention' : 'risk';
   const f = last.features || {};
   const serious = (f.wilting ? 1 : 0) + (f.disease_signs ? 1 : 0) + (f.leaf_color === 'browning' ? 1 : 0) + (f.pest_damage ? 1 : 0);
-  if (serious >= 2) st = 'risk';
-  else if (serious === 1 && (st === 'thriving' || st === 'ontrack')) st = 'attention';
+  const abnormal = f.matches_normal === false || (f.concerns || []).length > 0;
+  if (serious >= 2 || f.overall_condition === 'dying' || (f.overall_condition === 'poor' && serious >= 1)) st = 'risk';
+  else if ((serious === 1 || f.overall_condition === 'poor' || abnormal) && (st === 'thriving' || st === 'ontrack')) st = 'attention';
+  else if (f.overall_condition === 'fair' && st === 'thriving') st = 'ontrack';
   return st;
 }
 
