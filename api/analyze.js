@@ -85,7 +85,43 @@ function buildPrompt(b) {
   ].join('\n');
 }
 
-async function callGemini(model, key, body) {
+/** Speed setting for each model family (2.5 uses a thinking budget, 3.x uses a thinking level). */
+function thinkingFor(model) {
+  if (/gemini-2\.5/.test(model)) return { thinkingConfig: { thinkingBudget: 0 } };
+  if (/gemini-3|latest/.test(model)) return { thinkingConfig: { thinkingLevel: 'low' } };
+  return {};
+}
+
+/**
+ * Ask Google which Flash models THIS key may use (older ones get switched off for new accounts),
+ * newest first. Cached for 10 minutes so it doesn't slow down every check-in.
+ */
+let modelCache = { at: 0, list: null };
+async function availableModels(key) {
+  if (modelCache.list && Date.now() - modelCache.at < 10 * 60 * 1000) return modelCache.list;
+  try {
+    const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=200', {
+      headers: { 'x-goog-api-key': key },
+      signal: AbortSignal.timeout(5000),
+    });
+    if (!r.ok) throw new Error('list ' + r.status);
+    const data = await r.json();
+    const version = (n) => Number((n.match(/gemini-(\d+(?:\.\d+)?)/) || [])[1] || 0);
+    const list = (data.models || [])
+      .filter((m) => (m.supportedGenerationMethods || []).includes('generateContent'))
+      .map((m) => m.name.replace(/^models\//, ''))
+      .filter((n) => /flash/.test(n) && !/image|tts|audio|live|embed|thinking|exp/.test(n))
+      .sort((a, b) => (/lite/.test(a) - /lite/.test(b)) || (/preview/.test(a) - /preview/.test(b)) || version(b) - version(a));
+    modelCache = { at: Date.now(), list };
+    console.log('[Gemini models this key can use]', list.slice(0, 6).join(', '));
+    return list;
+  } catch (err) {
+    console.log('[Could not list Gemini models]', String(err?.message || err));
+    return [];
+  }
+}
+
+async function callGemini(model, key, body, useThinkingConfig = true) {
   const parts = [{ text: buildPrompt(body) }];
   if (body.image?.data && body.image?.mimeType) parts.push({ inline_data: { mime_type: body.image.mimeType, data: body.image.data } });
   const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
@@ -97,8 +133,8 @@ async function callGemini(model, key, body) {
         responseMimeType: 'application/json',
         responseSchema: SCHEMA,
         temperature: 0.2,
-        // 2.5 models "think" before answering by default, which can take 20+ seconds. Skip it: this task is simple.
-        ...(model.startsWith('gemini-2.5') ? { thinkingConfig: { thinkingBudget: 0 } } : {}),
+        // Newer models "think" before answering, which can take 20+ seconds. Keep it short: this task is simple.
+        ...(useThinkingConfig ? thinkingFor(model) : {}),
       },
     }),
     signal: AbortSignal.timeout(20000),
@@ -154,13 +190,22 @@ async function handle(req, res) {
   };
   if (!key) return fallback('GEMINI_API_KEY is not set on the server.');
 
-  // If one model is busy (Google returns 503 "high demand" or 429), try the next one.
-  const models = [...new Set([process.env.GEMINI_MODEL, 'gemini-2.5-flash', 'gemini-flash-latest', 'gemini-2.5-flash-lite'].filter(Boolean))];
+  // Try the models this key can actually use; if one is busy (503), slow, or retired (404), try the next.
+  const listed = await availableModels(key);
+  const models = [...new Set([process.env.GEMINI_MODEL, ...listed.slice(0, 3), 'gemini-flash-latest', 'gemini-2.5-flash'].filter(Boolean))].slice(0, 4);
   let lastErr;
+  const attempts = [];
   for (const model of models) {
     try {
       const started = Date.now();
-      const out = await callGemini(model, key, body);
+      let out;
+      try {
+        out = await callGemini(model, key, body, true);
+      } catch (e) {
+        // If this model doesn't accept our speed setting, ask again without it.
+        if (e.status === 400 && /thinking/i.test(e.message)) out = await callGemini(model, key, body, false);
+        else throw e;
+      }
       console.log(`\n[Gemini ${model}] ${((Date.now() - started) / 1000).toFixed(1)}s · note: "${(body.note || '').slice(0, 80)}"${body.image ? ' + photo' : ''}\n→`, out);
       const { summary, advice, urgent, confidence, follow_up_question, ...features } = out;
       return finish(res, body, { source: 'gemini', model, features, summary, advice, urgent, confidence, follow_up_question });
@@ -168,11 +213,12 @@ async function handle(req, res) {
       // Note: a timeout error's message is read-only, so we store our own copy instead of editing it.
       const msg = err?.name === 'TimeoutError' ? `Gemini ${model} took longer than 20 seconds.` : String(err?.message || err);
       lastErr = { message: msg, status: err?.status };
+      attempts.push(`${model}: ${err?.status || (err?.name === 'TimeoutError' ? 'slow' : 'error')}`);
       console.log(`\n[Gemini ${model} failed, trying the next model]`, msg.slice(0, 160));
       // A wrong or blocked API key won't work with any model, so stop early.
       if (err.status === 401 || err.status === 403) break;
     }
   }
   console.error(lastErr);
-  return fallback(String(lastErr?.message || lastErr).slice(0, 200));
+  return fallback(`Tried ${attempts.join(', ')}. Last: ${String(lastErr?.message || lastErr).slice(0, 160)}`);
 }
